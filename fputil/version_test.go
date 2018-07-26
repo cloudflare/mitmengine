@@ -13,13 +13,13 @@ func TestVersionString(t *testing.T) {
 		out string
 	}{
 		{fp.VersionEmpty, ""},
-		{fp.VersionSSL2, "2.0"},
-		{fp.VersionSSL3, "3.0"},
-		{fp.VersionTLS10, "3.1"},
-		{fp.VersionTLS11, "3.2"},
-		{fp.VersionTLS12, "3.3"},
-		{fp.VersionTLS13, "3.4"},
-		{fp.Version(255), "Version(255)"},
+		{fp.VersionSSL2, "200"},
+		{fp.VersionSSL3, "300"},
+		{fp.VersionTLS10, "301"},
+		{fp.VersionTLS11, "302"},
+		{fp.VersionTLS12, "303"},
+		{fp.VersionTLS13, "304"},
+		{fp.Version(255), "ff"},
 	}
 
 	for _, test := range tests {

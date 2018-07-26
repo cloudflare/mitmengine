@@ -67,7 +67,7 @@ func TestDatabaseGetByRequestFingerprint(t *testing.T) {
 	}
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
 	a.Add(db.Record{RequestSignature: fp.RequestSignature{
-		Version: fp.VersionSignature{Expected: 1, Min: 1, Max: 1},
+		Version: fp.VersionSignature{Exp: 1, Min: 1, Max: 1},
 	}})
 	for _, test := range tests {
 		testutil.Equals(t, test.out, a.GetByRequestFingerprint(test.in))
