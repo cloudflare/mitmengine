@@ -7,13 +7,18 @@ import (
 	"github.com/cloudflare/mitmengine/testutil"
 )
 
+var (
+	anyUAVersionFin = fp.UAVersion{-1, -1, -1}
+	anyUAVersionSig = fp.UAVersionSignature{Min: anyUAVersionFin, Max: anyUAVersionFin}
+)
+
 func TestNewUAFingerprint(t *testing.T) {
 	var tests = []struct {
 		in  string
 		out fp.UAFingerprint
 	}{
 		{"0:0.0.0:0:0:0.0.0:0:", fp.UAFingerprint{}},
-		{"0::0:0::0:", fp.UAFingerprint{BrowserVersion: fp.UAVersion{-1, -1, -1}, OSVersion: fp.UAVersion{-1, -1, -1}}},
+		{"0::0:0::0:", fp.UAFingerprint{BrowserVersion: anyUAVersionFin, OSVersion: anyUAVersionFin}},
 	}
 	for _, test := range tests {
 		fingerprint, err := fp.NewUAFingerprint(test.in)
@@ -28,7 +33,7 @@ func TestUAFingerprintString(t *testing.T) {
 		out string
 	}{
 		{fp.UAFingerprint{}, "0:0.0.0:0:0:0.0.0:0:"},
-		{fp.UAFingerprint{BrowserVersion: fp.UAVersion{-1, -1, -1}, OSVersion: fp.UAVersion{-1, -1, -1}}, "0::0:0::0:"},
+		{fp.UAFingerprint{BrowserVersion: anyUAVersionFin, OSVersion: anyUAVersionFin}, "0::0:0::0:"},
 	}
 	for _, test := range tests {
 		testutil.Equals(t, test.out, test.in.String())
@@ -40,8 +45,10 @@ func TestNewUASignature(t *testing.T) {
 		in  string
 		out fp.UASignature
 	}{
-		{"0:0.0.0:0:0:0.0.0:0:", fp.UASignature{}},
-		{"0::0:0::0:", fp.UASignature{BrowserVersion: fp.UAVersionSignature{Min: fp.UAVersion{-1, -1, -1}, Max: fp.UAVersion{-1, -1, -1}}, OSVersion: fp.UAVersionSignature{Min: fp.UAVersion{-1, -1, -1}, Max: fp.UAVersion{-1, -1, -1}}}},
+		{"0:0.0.0:0:0:0.0.0:0:*", fp.UASignature{Quirk: anyStringSig}},
+		{"0::0:0::0:*", fp.UASignature{BrowserVersion: anyUAVersionSig, OSVersion: anyUAVersionSig, Quirk: anyStringSig}},
+		{"0:0.0.0:0:0:0.0.0:0:", fp.UASignature{Quirk: emptyStringSig}},
+		{"0::0:0::0:", fp.UASignature{BrowserVersion: anyUAVersionSig, OSVersion: anyUAVersionSig, Quirk: emptyStringSig}},
 	}
 	for _, test := range tests {
 		uaSignature, err := fp.NewUASignature(test.in)
@@ -55,8 +62,10 @@ func TestUASignatureString(t *testing.T) {
 		in  fp.UASignature
 		out string
 	}{
-		{fp.UASignature{}, "0:0.0.0:0:0:0.0.0:0:"},
-		{fp.UASignature{BrowserVersion: fp.UAVersionSignature{Min: fp.UAVersion{-1, -1, -1}, Max: fp.UAVersion{-1, -1, -1}}, OSVersion: fp.UAVersionSignature{Min: fp.UAVersion{-1, -1, -1}, Max: fp.UAVersion{-1, -1, -1}}}, "0::0:0::0:"},
+		{fp.UASignature{}, "0:0.0.0:0:0:0.0.0:0:*"},
+		{fp.UASignature{BrowserVersion: anyUAVersionSig, OSVersion: anyUAVersionSig}, "0::0:0::0:*"},
+		{fp.UASignature{Quirk: emptyStringSig}, "0:0.0.0:0:0:0.0.0:0:"},
+		{fp.UASignature{BrowserVersion: anyUAVersionSig, OSVersion: anyUAVersionSig, Quirk: emptyStringSig}, "0::0:0::0:"},
 	}
 	for _, test := range tests {
 		testutil.Equals(t, test.out, test.in.String())

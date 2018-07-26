@@ -375,12 +375,13 @@ gen_req_part() {
 	# select the first ssl record (skipping ssl2 signatures)
 	raw_sig=`cat $tmpfile | grep "mod=ssl" | grep -v "v2" | head -1`
 	rm $tmpfile
+	if [ -z "${raw_sig}" ]; then
+		ok="false"
+		return
+	fi
 
 	raw_sig=${raw_sig#*raw_sig=} # remove text before raw signature
 	req_ssl=${raw_sig%:*} # remove flags from p0f signature
-	if [ -z "${req_ssl}" ]; then
-		ok="false"
-	fi
 	ssl_flags=${raw_sig##:*}
 	if [[ $ssl_flags =~ .*compr.* ]]; then
 		req_quirk=${req_quirk:+$req_quirk,}compr

@@ -7,6 +7,7 @@ print_header
 
 pcaps=`find testdata/antivirus-run2 -type f -name "handshake.pcap"`
 for pcapfile in $pcaps; do
+	clear_record
 	info=$pcapfile
 	info=${info%/*} # strip off '/handshake.pcap'
 	info=${info##*/} # strip any other directory names
