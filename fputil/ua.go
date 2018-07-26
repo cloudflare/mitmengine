@@ -324,7 +324,7 @@ type UASignature struct {
 	OSName         int
 	OSVersion      UAVersionSignature
 	DeviceType     int
-	Quirk          StringList
+	Quirk          StringSignature
 }
 
 // Parse a user agent signature from a string and return an error on failure
@@ -406,6 +406,7 @@ func (a UASignature) Merge(b UASignature) UASignature {
 	} else {
 		merged.DeviceType = a.DeviceType
 	}
+	merged.Quirk = a.Quirk.Merge(b.Quirk)
 	return merged
 }
 
@@ -428,10 +429,11 @@ func (a UASignature) Match(fingerprint UAFingerprint) Match {
 
 	matchBrowserVersion := a.BrowserVersion.Match(fingerprint.BrowserVersion)
 	matchOSVersion := a.OSVersion.Match(fingerprint.OSVersion)
-	if matchBrowserVersion == MatchImpossible || matchOSVersion == MatchImpossible {
+	matchQuirk := a.Quirk.Match(fingerprint.Quirk)
+	if matchBrowserVersion == MatchImpossible || matchOSVersion == MatchImpossible || matchQuirk == MatchImpossible {
 		return MatchImpossible
 	}
-	if matchBrowserVersion == MatchUnlikely || matchOSVersion == MatchUnlikely {
+	if matchBrowserVersion == MatchUnlikely || matchOSVersion == MatchUnlikely || matchQuirk == MatchUnlikely {
 		return MatchUnlikely
 	}
 	return MatchPossible

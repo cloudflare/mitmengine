@@ -1,6 +1,9 @@
 package fp
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Version represents a TLS Version
 type Version uint16
@@ -14,47 +17,39 @@ func NewVersion(s string) (Version, error) {
 
 // Parse initializes a version from a string
 func (a *Version) Parse(s string) error {
-	switch s {
-	case "":
+	if len(s) == 0 {
 		*a = VersionEmpty
-	case "2.0":
+		return nil
+	}
+	u, err := strconv.ParseUint(s, 16, 16)
+	if err != nil {
+		return err
+	}
+	switch u {
+	case 2, 0x0200: // version 2 is 0x0002 on the wire
 		*a = VersionSSL2
-	case "3.0":
+	case 0x0300:
 		*a = VersionSSL3
-	case "3.1":
+	case 0x0301:
 		*a = VersionTLS10
-	case "3.2":
+	case 0x0302:
 		*a = VersionTLS11
-	case "3.3":
+	case 0x0303:
 		*a = VersionTLS12
-	case "3.4":
+	case 0x0304:
 		*a = VersionTLS13
 	default:
-		return fmt.Errorf("invalid version: '%s'", s)
+		return fmt.Errorf("invalid tls version: %s", s)
 	}
 	return nil
 }
 
 // String returns a string representation of the version
 func (a Version) String() string {
-	switch a {
-	case VersionEmpty:
+	if a == VersionEmpty {
 		return ""
-	case VersionSSL2:
-		return "2.0"
-	case VersionSSL3:
-		return "3.0"
-	case VersionTLS10:
-		return "3.1"
-	case VersionTLS11:
-		return "3.2"
-	case VersionTLS12:
-		return "3.3"
-	case VersionTLS13:
-		return "3.4"
-	default:
-		return fmt.Sprintf("Version(%d)", a)
 	}
+	return fmt.Sprintf("%x", uint16(a))
 }
 
 // Grade returns a security grade for the version
@@ -82,7 +77,7 @@ func (a Version) Grade() Grade {
 //  - TLS1.3: https://tools.ietf.org/html/draft-ietf-tls-tls13-28#section-4.2.1
 const (
 	VersionEmpty Version = 0
-	VersionSSL2  Version = 0x0002
+	VersionSSL2  Version = 0x0200 // 0x0002 on the wire, so let's swap here
 	VersionSSL3  Version = 0x0300
 	VersionTLS10 Version = 0x0301
 	VersionTLS11 Version = 0x0302

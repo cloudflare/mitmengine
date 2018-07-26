@@ -3,6 +3,7 @@ package fp
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -137,9 +138,9 @@ type RequestSignature struct {
 
 // A VersionSignature is a signature for a TLS version.
 type VersionSignature struct {
-	Expected Version
-	Min      Version
-	Max      Version
+	Min Version
+	Exp Version
+	Max Version
 }
 
 // An IntSignature is a signature on a list of integers.
@@ -224,7 +225,7 @@ func (a *RequestSignature) IsPfs() bool {
 
 // Parse a version signature from a string and return an error on failure.
 func (a *VersionSignature) Parse(s string) error {
-	a.Expected, a.Min, a.Max = VersionEmpty, VersionEmpty, VersionEmpty
+	a.Min, a.Exp, a.Max = VersionEmpty, VersionEmpty, VersionEmpty
 	if len(s) == 0 {
 		return nil
 	}
@@ -232,16 +233,16 @@ func (a *VersionSignature) Parse(s string) error {
 	var err error
 	switch len(fields) {
 	case 1:
-		if err = a.Expected.Parse(fields[0]); err != nil {
+		if err = a.Min.Parse(fields[0]); err != nil {
 			return err
 		}
-		a.Min = a.Expected
-		a.Max = a.Expected
+		a.Exp = a.Min
+		a.Max = a.Min
 	case 3:
-		if err = a.Expected.Parse(fields[0]); err != nil {
+		if err = a.Min.Parse(fields[0]); err != nil {
 			return err
 		}
-		if err = a.Min.Parse(fields[1]); err != nil {
+		if err = a.Exp.Parse(fields[1]); err != nil {
 			return err
 		}
 		if err = a.Max.Parse(fields[2]); err != nil {
@@ -252,19 +253,26 @@ func (a *VersionSignature) Parse(s string) error {
 	}
 	// sanity check
 	if a.Min != VersionEmpty {
-		if a.Expected != VersionEmpty && a.Min > a.Expected {
-			return fmt.Errorf("version: Min > Expected")
+		if a.Exp != VersionEmpty && a.Min > a.Exp {
+			return fmt.Errorf("version: Min > Exp")
 		}
 		if a.Max != VersionEmpty && a.Min > a.Max {
 			return fmt.Errorf("version: Min > Max")
 		}
 	}
-	if a.Expected != VersionEmpty {
-		if a.Max != VersionEmpty && a.Expected > a.Max {
-			return fmt.Errorf("version: Expected > Max")
+	if a.Exp != VersionEmpty {
+		if a.Max != VersionEmpty && a.Exp > a.Max {
+			return fmt.Errorf("version: Exp > Max")
 		}
 	}
 	return nil
+}
+
+// NewVersionSignature returns a new int signature parsed from a string.
+func NewVersionSignature(s string) (VersionSignature, error) {
+	var a VersionSignature
+	err := a.Parse(s)
+	return a, err
 }
 
 // NewIntSignature returns a new int signature parsed from a string.
@@ -346,9 +354,9 @@ func (a *IntSignature) Parse(s string) error {
 // Parse a string signature from a string and return an error on failure.
 func (a *StringSignature) Parse(s string) error {
 	a.OrderedList = StringList{}
-	a.ExcludedSet = make(StringSet)
 	a.UnlikelySet = make(StringSet)
 	a.OptionalSet = make(StringSet)
+	a.ExcludedSet = make(StringSet)
 	a.RequiredSet = make(StringSet)
 	if len(s) == 0 {
 		return nil
@@ -408,10 +416,10 @@ func (a RequestSignature) String() string {
 
 // Return a string representation of the version signature.
 func (a VersionSignature) String() string {
-	if a.Min == a.Expected && a.Max == a.Expected {
-		return a.Expected.String()
+	if a.Min == a.Exp && a.Max == a.Exp {
+		return a.Exp.String()
 	}
-	return strings.Join([]string{a.Expected.String(), a.Min.String(), a.Max.String()}, fieldElemSep)
+	return strings.Join([]string{a.Exp.String(), a.Min.String(), a.Max.String()}, fieldElemSep)
 }
 
 // String returns a string representation of the int signature.
@@ -433,6 +441,9 @@ func (a IntSignature) String() string {
 		list = append(list, a.UnlikelySet.List()...)
 	}
 	list = append(list, a.ExcludedSet.List()...)
+	if a.OrderedList == nil {
+		sort.Slice(list, func(a, b int) bool { return list[a] < list[b] })
+	}
 	for idx, elem := range list {
 		if idx != 0 {
 			buf.WriteString(fieldElemSep)
@@ -469,6 +480,9 @@ func (a StringSignature) String() string {
 		list = append(list, a.UnlikelySet.List()...)
 	}
 	list = append(list, a.ExcludedSet.List()...)
+	if a.OrderedList == nil {
+		sort.Slice(list, func(a, b int) bool { return list[a] < list[b] })
+	}
 	for idx, elem := range list {
 		if idx != 0 {
 			buf.WriteString(fieldElemSep)
@@ -503,9 +517,9 @@ func (a RequestSignature) Merge(b RequestSignature) (merged RequestSignature) {
 // Merge version signatures a and b to match fingerprints from both.
 func (a VersionSignature) Merge(b VersionSignature) (merged VersionSignature) {
 	merged = a
-	if a.Expected != VersionEmpty {
-		if b.Expected == VersionEmpty || b.Expected < a.Expected {
-			merged.Expected = b.Expected
+	if a.Exp != VersionEmpty {
+		if b.Exp == VersionEmpty || b.Exp < a.Exp {
+			merged.Exp = b.Exp
 		}
 	}
 	if a.Min != VersionEmpty {
@@ -568,10 +582,14 @@ func (a IntSignature) Merge(b IntSignature) (merged IntSignature) {
 	}
 
 	// Take intersection of required elems
-	merged.RequiredSet = a.RequiredSet.Inter(b.RequiredSet)
+	if a.RequiredSet != nil || b.RequiredSet != nil {
+		merged.RequiredSet = a.RequiredSet.Inter(b.RequiredSet)
+	}
 
 	// Take intersection of excluded elems
-	merged.ExcludedSet = a.ExcludedSet.Inter(b.ExcludedSet)
+	if a.ExcludedSet != nil || b.ExcludedSet != nil {
+		merged.ExcludedSet = a.ExcludedSet.Inter(b.ExcludedSet)
+	}
 
 	// Take union of optional elems
 	if a.OptionalSet == nil || b.OptionalSet == nil {
@@ -637,10 +655,14 @@ func (a StringSignature) Merge(b StringSignature) (merged StringSignature) {
 	}
 
 	// Take intersection of required elems
-	merged.RequiredSet = a.RequiredSet.Inter(b.RequiredSet)
+	if a.RequiredSet != nil || b.RequiredSet != nil {
+		merged.RequiredSet = a.RequiredSet.Inter(b.RequiredSet)
+	}
 
 	// Take intersection of excluded elems
-	merged.ExcludedSet = a.ExcludedSet.Inter(b.ExcludedSet)
+	if a.ExcludedSet != nil || b.ExcludedSet != nil {
+		merged.ExcludedSet = a.ExcludedSet.Inter(b.ExcludedSet)
+	}
 
 	// Take union of optional elems
 	if a.OptionalSet == nil || b.OptionalSet == nil {
@@ -700,7 +722,7 @@ func (a VersionSignature) Match(version Version) Match {
 	if a.Max != VersionEmpty && version > a.Max {
 		return MatchImpossible
 	}
-	if a.Expected != VersionEmpty && version < a.Expected {
+	if a.Exp != VersionEmpty && version < a.Exp {
 		return MatchUnlikely
 	}
 	return MatchPossible

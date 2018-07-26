@@ -107,7 +107,8 @@ func (a *Database) DeleteBy(deleteFunc func(Record) bool) {
 }
 
 // MergeBy merges records for which mergeFunc returns true.
-func (a *Database) MergeBy(mergeFunc func(Record, Record) bool) {
+func (a *Database) MergeBy(mergeFunc func(Record, Record) bool) (int, int) {
+	before := len(a.RecordMap)
 	for id1 := range a.RecordMap {
 		for id2 := range a.RecordMap {
 			if id1 == id2 {
@@ -124,4 +125,5 @@ func (a *Database) MergeBy(mergeFunc func(Record, Record) bool) {
 			}
 		}
 	}
+	return before, len(a.RecordMap)
 }

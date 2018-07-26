@@ -7,6 +7,25 @@ import (
 	"github.com/cloudflare/mitmengine/testutil"
 )
 
+var (
+	emptyVersionSig = fp.VersionSignature{}
+	emptyIntSig     = fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)}
+	emptyStringSig  = fp.StringSignature{
+		OrderedList: fp.StringList{},
+		OptionalSet: make(fp.StringSet),
+		UnlikelySet: make(fp.StringSet),
+		ExcludedSet: make(fp.StringSet),
+		RequiredSet: make(fp.StringSet),
+	}
+	anyStringSig = fp.StringSignature{
+		OrderedList: nil,
+		OptionalSet: nil,
+		UnlikelySet: make(fp.StringSet),
+		ExcludedSet: make(fp.StringSet),
+		RequiredSet: make(fp.StringSet),
+	}
+)
+
 func TestNewRequestFingerprint(t *testing.T) {
 	var tests = []struct {
 		in  string
@@ -39,13 +58,13 @@ func TestNewRequestSignature(t *testing.T) {
 		sig fp.RequestSignature
 	}{
 		{"::::::", fp.RequestSignature{
-			Version:    fp.VersionSignature{},
-			Cipher:     fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			Extension:  fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			Curve:      fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			EcPointFmt: fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			Header:     fp.StringSignature{fp.StringList{}, make(fp.StringSet), make(fp.StringSet), make(fp.StringSet), make(fp.StringSet)},
-			Quirk:      fp.StringSignature{fp.StringList{}, make(fp.StringSet), make(fp.StringSet), make(fp.StringSet), make(fp.StringSet)},
+			Version:    emptyVersionSig,
+			Cipher:     emptyIntSig,
+			Extension:  emptyIntSig,
+			Curve:      emptyIntSig,
+			EcPointFmt: emptyIntSig,
+			Header:     emptyStringSig,
+			Quirk:      emptyStringSig,
 		}},
 	}
 	for _, test := range tests {
@@ -61,13 +80,13 @@ func TestRequestSignatureString(t *testing.T) {
 		out string
 	}{
 		{fp.RequestSignature{
-			Version:    fp.VersionSignature{},
-			Cipher:     fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			Extension:  fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			Curve:      fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			EcPointFmt: fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)},
-			Header:     fp.StringSignature{fp.StringList{}, make(fp.StringSet), make(fp.StringSet), make(fp.StringSet), make(fp.StringSet)},
-			Quirk:      fp.StringSignature{fp.StringList{}, make(fp.StringSet), make(fp.StringSet), make(fp.StringSet), make(fp.StringSet)},
+			Version:    emptyVersionSig,
+			Cipher:     emptyIntSig,
+			Extension:  emptyIntSig,
+			Curve:      emptyIntSig,
+			EcPointFmt: emptyIntSig,
+			Header:     emptyStringSig,
+			Quirk:      emptyStringSig,
 		}, "::::::"},
 	}
 	for _, test := range tests {
@@ -89,6 +108,21 @@ func TestRequestSignatureMerge(t *testing.T) {
 		testutil.Equals(t, nil, err)
 		signature2, err := fp.NewRequestSignature(test.in2)
 		testutil.Equals(t, nil, err)
+		testutil.Equals(t, test.out, signature1.Merge(signature2).String())
+	}
+}
+
+func TestVersionSignatureMerge(t *testing.T) {
+	var tests = []struct {
+		in1 string
+		in2 string
+		out string
+	}{}
+	for _, test := range tests {
+		signature1, err := fp.NewIntSignature(test.in1)
+		testutil.Ok(t, err)
+		signature2, err := fp.NewIntSignature(test.in2)
+		testutil.Ok(t, err)
 		testutil.Equals(t, test.out, signature1.Merge(signature2).String())
 	}
 }
@@ -156,6 +190,30 @@ func TestRequestSignatureMatch(t *testing.T) {
 		signature, err := fp.NewRequestSignature(test.in1)
 		testutil.Ok(t, err)
 		fingerprint, err := fp.NewRequestFingerprint(test.in2)
+		testutil.Ok(t, err)
+		testutil.Equals(t, signature.Match(fingerprint), test.out)
+	}
+}
+
+func TestVersionSignatureMatch(t *testing.T) {
+	var tests = []struct {
+		in1 string
+		in2 string
+		out fp.Match
+	}{
+		{"", "303", fp.MatchPossible},   // match anything
+		{",,", "303", fp.MatchPossible}, // long version, match anything
+		{"0200", "200", fp.MatchPossible},
+		{"2", "200", fp.MatchPossible},
+		{"200,200,302", "301", fp.MatchPossible},
+		{"200,302,302", "301", fp.MatchUnlikely},
+		{"302,302,302", "301", fp.MatchImpossible},
+		{"200,200,301", "302", fp.MatchImpossible},
+	}
+	for _, test := range tests {
+		signature, err := fp.NewVersionSignature(test.in1)
+		testutil.Ok(t, err)
+		fingerprint, err := fp.NewVersion(test.in2)
 		testutil.Ok(t, err)
 		testutil.Equals(t, signature.Match(fingerprint), test.out)
 	}
