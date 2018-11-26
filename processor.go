@@ -84,7 +84,7 @@ func (a *Processor) Load(config Config) error {
 	return nil
 }
 
-func loadFile (fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
+func loadFile(fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
 	var file io.ReadCloser
 	var readErr error
 	//log.Println("reader is", dbReader)
