@@ -5,14 +5,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/cloudflare/mitmengine/db"
-	"github.com/cloudflare/mitmengine/fputil"
-	"github.com/cloudflare/mitmengine/loader"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/cloudflare/mitmengine/db"
+	fp "github.com/cloudflare/mitmengine/fputil"
+	"github.com/cloudflare/mitmengine/loader"
 )
 
 var (
