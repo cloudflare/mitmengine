@@ -5,14 +5,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/cloudflare/mitmengine/db"
+	"github.com/cloudflare/mitmengine/fputil"
+	"github.com/cloudflare/mitmengine/loader"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/cloudflare/mitmengine/db"
-	fp "github.com/cloudflare/mitmengine/fputil"
 )
 
 var (
@@ -30,11 +30,13 @@ type Processor struct {
 }
 
 // A Config contains information for initializing the processor such as the
-// file names to read records from.
+// file names to read records from, as well as Loader information in the case
+// the fingerprints are read from any datasource.
 type Config struct {
-	BrowserFileName   string
-	MitmFileName      string
-	BadHeaderFileName string
+	BrowserFileName   	string
+	MitmFileName      	string
+	BadHeaderFileName 	string
+	Loader              loader.Loader
 }
 
 // NewProcessor returns a new Processor initialized from the config.
@@ -46,36 +48,52 @@ func NewProcessor(config Config) (Processor, error) {
 
 // Load (or reload) the processor state from the provided configuration.
 func (a *Processor) Load(config Config) error {
-	var file io.ReadCloser
-	var err error
-	if file, err = os.Open(config.BrowserFileName); err != nil {
-		log.Printf("browser file: %v", err)
-		file = ioutil.NopCloser(bytes.NewReader(nil))
+	browserFingerprints, err := loadFile(config.BrowserFileName, config.Loader)
+	if err != nil {
+		log.Printf("WARNING: loading file \"%s\" produced error \"%s\"", config.BrowserFileName, err)
+		browserFingerprints = ioutil.NopCloser(bytes.NewReader(nil))
 	}
-	if a.BrowserDatabase, err = db.NewDatabase(file); err != nil {
+	if a.BrowserDatabase, err = db.NewDatabase(browserFingerprints); err != nil {
 		return err
 	}
-	file.Close()
-	if file, err = os.Open(config.MitmFileName); err != nil {
-		log.Printf("mitm file: %v", err)
-		file = ioutil.NopCloser(bytes.NewReader(nil))
+	browserFingerprints.Close()
+
+	mitmFingerprints, err := loadFile(config.MitmFileName, config.Loader)
+	if err != nil {
+		log.Printf("WARNING: loading file \"%s\" produced error \"%s\"", config.MitmFileName, err)
+		mitmFingerprints = ioutil.NopCloser(bytes.NewReader(nil))
 	}
-	if a.MitmDatabase, err = db.NewDatabase(file); err != nil {
+	if a.MitmDatabase, err = db.NewDatabase(mitmFingerprints); err != nil {
 		return err
 	}
-	file.Close()
-	if file, err = os.Open(config.BadHeaderFileName); err != nil {
-		log.Printf("badheader file: %v", err)
-		file = ioutil.NopCloser(bytes.NewReader(nil))
+	mitmFingerprints.Close()
+
+	badHeaders, err := loadFile(config.BadHeaderFileName, config.Loader)
+	if err != nil {
+		log.Printf("WARNING: loading file \"%s\" produced error \"%s\"", config.BadHeaderFileName, err)
+		badHeaders = ioutil.NopCloser(bytes.NewReader(nil))
 	}
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(badHeaders)
 	var badHeaderList fp.StringList
 	for scanner.Scan() {
 		badHeaderList = append(badHeaderList, scanner.Text())
 	}
 	a.BadHeaderSet = badHeaderList.Set()
-	file.Close()
+	badHeaders.Close()
+
 	return nil
+}
+
+func loadFile (fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
+	var file io.ReadCloser
+	var readErr error
+	//log.Println("reader is", dbReader)
+	if dbReader == nil { // read directly from file
+		file, readErr = os.Open(fileName)
+	} else {
+		file, readErr = dbReader.LoadFile(fileName)
+	}
+	return file, readErr
 }
 
 // Check if the supplied client hello fields match the expected client hello
