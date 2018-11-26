@@ -23,7 +23,7 @@ var testConfigFile = Config{
 	BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
 }
 
-// This test config tests the Loader interface that is extended by the S3 struct. Anyone who
+// This test config tests the Loader interface that is implemented by the S3 struct. Anyone who
 // contributes additional loaders can either add additional testConfigs here and/or write similar
 // unit tests in the loader package.
 var testConfigS3 = Config{
