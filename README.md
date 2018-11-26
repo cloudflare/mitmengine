@@ -46,7 +46,7 @@ struct can either specify filenames of files containing browser fingerprints, MI
 headers. Alternatively, it can also specify a configuration file for reading the previously mentioned files from any 
 other source; right now, mitmengine supports reading these files from Amazon S3 client-compatible databases (including 
 Amazon S3 and Ceph). Additional file readers for databases (which we call "loaders") can be defined in the `loaders` 
-package, and as long as new loaders extend the Loader interface, they should work with the rest of mitmengine out of the 
+package, and as long as new loaders implement the Loader interface, they should work with the rest of mitmengine out of the 
 box. We added support for additional fingerprint and bad header sources in the case mitmengine is run as a daemon and 
 you want to have it periodically update the fingerprint and bad header files it uses to analyze traffic.
 

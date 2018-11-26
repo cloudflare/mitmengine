@@ -12,11 +12,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// struct S3 implements interface Loader, so it can be used in an mitmengine.Config struct when getting a
+// mitmengine.Processor.
 type S3 struct {
 	configFileName string
 	bucket         *s3.Bucket
 }
 
+// Creates S3 struct from toml-styled configuration file (an implementation of a Loader)
 func NewS3Instance(configFileName string) (S3, error) {
 	var s3Instance S3
 
@@ -58,6 +61,7 @@ func NewS3Instance(configFileName string) (S3, error) {
 	}, nil
 }
 
+// Implements LoadFile function specified in Loader interface, as defined in loader.go
 func (s3 S3) LoadFile(fileName string) (io.ReadCloser, error) {
 	reader, err := s3.bucket.GetReader(fileName)
 	if err != nil {
