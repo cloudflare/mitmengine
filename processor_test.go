@@ -3,6 +3,7 @@ package mitmengine_test
 import (
 	"bufio"
 	"fmt"
+	"github.com/cloudflare/mitmengine/loader"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -17,10 +18,19 @@ import (
 
 var emptyConfig = mitmengine.Config{}
 
-var testConfig = mitmengine.Config{
+var testConfigFile = mitmengine.Config{
 	BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
 	MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
 	BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+}
+
+// This test config tests the Loader interface that is extended by the S3 struct. Anyone who
+// contributes additional loaders can either add additional testConfigs here and/or write similar
+// unit tests in the loader package.
+var testConfigS3 = mitmengine.Config{
+	BrowserFileName:   "browser.txt",
+	MitmFileName:      "mitm.txt",
+	BadHeaderFileName: "badheader.txt",
 }
 
 func uaSigToFin(signature fp.UASignature) (fp.UAFingerprint, error) {
@@ -36,15 +46,27 @@ func reqSigToFin(signature fp.RequestSignature) (fp.RequestFingerprint, error) {
 }
 
 func TestNewProcessor(t *testing.T) {
+	// Empty config
 	_, err := mitmengine.NewProcessor(emptyConfig)
 	testutil.Ok(t, err)
-	_, err = mitmengine.NewProcessor(testConfig)
+	// File config
+	_, err = mitmengine.NewProcessor(testConfigFile)
+	testutil.Ok(t, err)
+	// Loader (s3, specifically) config
+	// Only run if s3cfg.toml file exists in project root directory or loader directory.
+	s3Instance, err := loader.NewS3Instance("s3cfg.toml")
+	if err != nil {
+		t.Log("s3cfg.toml either does not exist in project root directory or loader directory, or was malformed")
+		return
+	}
+	testConfigS3.Loader = s3Instance
+	_, err = mitmengine.NewProcessor(testConfigS3)
 	testutil.Ok(t, err)
 }
 
 // Check that the fingerprints derived from pcaps match any updated signatures.
 func _TestProcessorKnownBrowserFingerprints(t *testing.T) {
-	a, _ := mitmengine.NewProcessor(testConfig)
+	a, _ := mitmengine.NewProcessor(testConfigFile)
 
 	file, err := os.Open(filepath.Join("testdata", "browser_fingerprints.txt"))
 	testutil.Ok(t, err)
@@ -67,7 +89,7 @@ func _TestProcessorKnownBrowserFingerprints(t *testing.T) {
 }
 
 func _TestProcessorKnownMitmFingerprints(t *testing.T) {
-	a, _ := mitmengine.NewProcessor(testConfig)
+	a, _ := mitmengine.NewProcessor(testConfigFile)
 
 	file, err := os.Open(filepath.Join("testdata", "mitm_fingerprints.txt"))
 	testutil.Ok(t, err)
@@ -102,7 +124,7 @@ func TestProcessorCheck(t *testing.T) {
 	}{
 		{"", "::::::", mitmengine.Report{Error: mitmengine.ErrorUnknownUserAgent}},
 	}
-	a, _ := mitmengine.NewProcessor(testConfig)
+	a, _ := mitmengine.NewProcessor(testConfigFile)
 	var userAgent ua.UserAgent
 	for _, test := range tests {
 		userAgent.Reset()
@@ -124,7 +146,7 @@ func TestProcessorCheck(t *testing.T) {
 }
 
 func TestProcessorGetByUASignatureBrowser(t *testing.T) {
-	file, err := os.Open(testConfig.BrowserFileName)
+	file, err := os.Open(testConfigFile.BrowserFileName)
 	testutil.Ok(t, err)
 	a, err := db.NewDatabase(file)
 	testutil.Ok(t, err)
@@ -137,8 +159,7 @@ func TestProcessorGetByUASignatureBrowser(t *testing.T) {
 }
 
 func TestProcessorGetByRequestSignatureMitm(t *testing.T) {
-
-	file, err := os.Open(testConfig.MitmFileName)
+	file, err := os.Open(testConfigFile.MitmFileName)
 	testutil.Ok(t, err)
 	a, err := db.NewDatabase(file)
 	testutil.Ok(t, err)
