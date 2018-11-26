@@ -2,13 +2,14 @@ package loader
 
 import (
 	"fmt"
-	"github.com/goamz/goamz/aws"
-	"github.com/goamz/goamz/s3"
-	"github.com/spf13/viper"
 	"io"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/goamz/goamz/aws"
+	"github.com/goamz/goamz/s3"
+	"github.com/spf13/viper"
 )
 
 type S3 struct {
