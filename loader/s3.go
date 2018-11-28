@@ -12,14 +12,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-// struct S3 implements interface Loader, so it can be used in an mitmengine.Config struct when getting a
+// S3 implements interface Loader, so it can be used in an mitmengine.Config struct when getting a
 // mitmengine.Processor.
 type S3 struct {
 	configFileName string
 	bucket         *s3.Bucket
 }
 
-// Creates S3 struct from toml-styled configuration file (an implementation of a Loader)
+// NewS3Instance creates S3 struct from toml-styled configuration file (an implementation of a Loader)
 func NewS3Instance(configFileName string) (S3, error) {
 	var s3Instance S3
 
@@ -27,11 +27,11 @@ func NewS3Instance(configFileName string) (S3, error) {
 	viper.SetConfigType("toml")
 	// Viper is weird and only expects filenames with no extensions...
 	viper.SetConfigName(strings.Replace(configFileName, ".toml", "", -1))
-	viper.AddConfigPath("./")
+	viper.AddConfigPath("$GOPATH/src/github.com/cloudflare/mitmengine/loader")
 	viper.AddConfigPath("$GOPATH/src/github.com/cloudflare/mitmengine/")
 	err := viper.ReadInConfig()
 	if err != nil {
-		return s3Instance, fmt.Errorf("fatal error config file: %s \n", err)
+		return s3Instance, fmt.Errorf("fatal error config file: %s", err)
 	}
 
 	accessKey := viper.GetString("AccessKey")
@@ -61,7 +61,7 @@ func NewS3Instance(configFileName string) (S3, error) {
 	}, nil
 }
 
-// Implements LoadFile function specified in Loader interface, as defined in loader.go
+// LoadFile implements the LoadFile function specified in Loader interface, as defined in loader.go
 func (s3 S3) LoadFile(fileName string) (io.ReadCloser, error) {
 	reader, err := s3.bucket.GetReader(fileName)
 	if err != nil {
