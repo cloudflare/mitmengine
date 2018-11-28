@@ -34,22 +34,22 @@ type Processor struct {
 // file names to read records from, as well as Loader information in the case
 // the fingerprints are read from any datasource.
 type Config struct {
-	BrowserFileName   	string
-	MitmFileName      	string
-	BadHeaderFileName 	string
-	Loader              loader.Loader
+	BrowserFileName   string
+	MitmFileName      string
+	BadHeaderFileName string
+	Loader            loader.Loader
 }
 
 // NewProcessor returns a new Processor initialized from the config.
-func NewProcessor(config Config) (Processor, error) {
+func NewProcessor(config *Config) (Processor, error) {
 	var a Processor
 	err := a.Load(config)
 	return a, err
 }
 
 // Load (or reload) the processor state from the provided configuration.
-func (a *Processor) Load(config Config) error {
-	browserFingerprints, err := loadFile(config.BrowserFileName, config.Loader)
+func (a *Processor) Load(config *Config) error {
+	browserFingerprints, err := LoadFile(config.BrowserFileName, config.Loader)
 	if err != nil {
 		log.Printf("WARNING: loading file \"%s\" produced error \"%s\"", config.BrowserFileName, err)
 		browserFingerprints = ioutil.NopCloser(bytes.NewReader(nil))
@@ -59,7 +59,7 @@ func (a *Processor) Load(config Config) error {
 	}
 	browserFingerprints.Close()
 
-	mitmFingerprints, err := loadFile(config.MitmFileName, config.Loader)
+	mitmFingerprints, err := LoadFile(config.MitmFileName, config.Loader)
 	if err != nil {
 		log.Printf("WARNING: loading file \"%s\" produced error \"%s\"", config.MitmFileName, err)
 		mitmFingerprints = ioutil.NopCloser(bytes.NewReader(nil))
@@ -69,7 +69,7 @@ func (a *Processor) Load(config Config) error {
 	}
 	mitmFingerprints.Close()
 
-	badHeaders, err := loadFile(config.BadHeaderFileName, config.Loader)
+	badHeaders, err := LoadFile(config.BadHeaderFileName, config.Loader)
 	if err != nil {
 		log.Printf("WARNING: loading file \"%s\" produced error \"%s\"", config.BadHeaderFileName, err)
 		badHeaders = ioutil.NopCloser(bytes.NewReader(nil))
@@ -85,10 +85,10 @@ func (a *Processor) Load(config Config) error {
 	return nil
 }
 
-func loadFile(fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
+// LoadFile lods individual files from local file storage or from a Loader interface.
+func LoadFile(fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
 	var file io.ReadCloser
 	var readErr error
-	//log.Println("reader is", dbReader)
 	if dbReader == nil { // read directly from file
 		file, readErr = os.Open(fileName)
 	} else {
