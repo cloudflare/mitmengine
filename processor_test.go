@@ -37,7 +37,37 @@ func TestMain(m *testing.M) {
 	// declaration).
 	// Only run if s3cfg.toml file exists in project root directory or loader directory.
 	s3Instance, err := loader.NewS3Instance("s3cfg.toml")
-	if err != nil {
+func TestProcessorConfigEmpty(t *testing.T) {
+    emptyConfig := Config{}
+    t.Run("New", func(t *testing.T) { _, err := NewProcessor(emptyConfig); testutil.Ok(t, err) })
+}
+func TestProcessorConfigFile (t *testing.T) {
+    testConfigFile := Config{
+        BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
+        MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
+        BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+    }
+    t.Run("New", func(t *testing.T) { _, err := NewProcessor(testConfigFile); testutil.Ok(t, err) })
+    t.Run("Check", func(t *testing.T) { _TestProcessorCheck(t, testConfigFile)})
+    t.Run("GetByUASignatureBrowser", func(t *testing.T) { _TestProcessorGetByUASignatureBrowser(t, testConfigFile)})
+    t.Run("GetByRequestSignatureMitm", func(t *testing.T) { _TestProcessorGetByRequestSignatureMitm(t, testConfigFile)})
+}
+func TestProcessorConfigS3 (t *testing.T) {
+    s3Instance, _ := loader.NewS3Instance("s3cfg.toml")
+    if err != nil {
+        t.Skip("s3cfg.toml either does not exist in project root directory or loader directory, or was malformed")
+    } 
+    testConfigS3 := Config{
+        BrowserFileName:   "browser.txt",
+        MitmFileName:      "mitm.txt",
+        BadHeaderFileName: "badheader.txt",
+        Loader: s3Instance,
+    }
+    t.Run("New", func(t *testing.T) { _, err := NewProcessor(testConfigS3); testutil.Ok(t, err) })
+    t.Run("Check", func(t *testing.T) { _TestProcessorCheck(t, testConfigS3)})
+    t.Run("GetByUASignatureBrowser", func(t *testing.T) { _TestProcessorGetByUASignatureBrowser(t, testConfigS3)})
+    t.Run("GetByRequestSignatureMitm", func(t *testing.T) { _TestProcessorGetByRequestSignatureMitm(t, testConfigS3)})
+}
 		//t.Log("s3cfg.toml either does not exist in project root directory or loader directory, or was malformed")
 		return
 	}
