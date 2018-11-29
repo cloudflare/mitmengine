@@ -1,0 +1,8 @@
+# These are the minimal fields required to read from an S3 instance.
+# Fill these fields in and then rename this file to s3cfg.toml, then this configuration will be automatically loaded
+# into mitmengine.
+AccessKey = ""
+SecretKey = ""
+S3Endpoint = ""
+S3BucketEndpoint = ""
+BucketName = ""

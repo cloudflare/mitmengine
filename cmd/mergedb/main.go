@@ -33,7 +33,7 @@ func askUser(scanner *bufio.Scanner, message string) bool {
 func main() {
 	var err error
 	var file *os.File
-	mitmProcessor, err := mitmengine.NewProcessor(mitmConfig)
+	mitmProcessor, err := mitmengine.NewProcessor(&mitmConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func main() {
 		total := size * size
 		count := 0
 		before, after = mitmProcessor.BrowserDatabase.MergeBy(func(r1, r2 db.Record) bool {
-			count += 1
+			count++
 			if count%size == 0 {
 				fmt.Printf("(%.2f)\r", (float32(count*100))/float32(total))
 			}
