@@ -16,7 +16,7 @@ func TestProcessorConfigS3(t *testing.T) {
 	// This test will be a no-op if no s3cfg.toml file is provided in the loader directory or the project's
 	// root directory.
 	if os.IsNotExist(notInLocalDirErr) && os.IsNotExist(notInProjectRootDirErr) {
-		t.Fatal(`No s3cfg.toml file found in project root directory 
+		t.Skip(`No s3cfg.toml file found in project root directory
 ($GOPATH/src/github.com/cloudflare/mitmengine) or loaders directory`)
 	}
 
