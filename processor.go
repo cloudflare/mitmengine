@@ -85,7 +85,7 @@ func (a *Processor) Load(config *Config) error {
 	return nil
 }
 
-// LoadFile lods individual files from local file storage or from a Loader interface.
+// LoadFile loads individual files from local file storage or from a Loader interface.
 func LoadFile(fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
 	var file io.ReadCloser
 	var readErr error
@@ -119,38 +119,16 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	}
 
 	// Remove grease ciphers, extensions, and curves from request fingerprint and add as quirk instead.
-	hasGrease := false
-	idx := 0
-	for _, elem := range actualReqFin.Cipher {
-		if (elem & 0x0f0f) == 0x0a0a {
-			hasGrease = true
-		} else {
-			actualReqFin.Cipher[idx] = elem
-			idx++
-		}
-	}
-	actualReqFin.Cipher = actualReqFin.Cipher[:idx]
-	idx = 0
-	for _, elem := range actualReqFin.Extension {
-		if (elem & 0x0f0f) == 0x0a0a {
-			hasGrease = true
-		} else {
-			actualReqFin.Extension[idx] = elem
-			idx++
-		}
-	}
-	actualReqFin.Extension = actualReqFin.Extension[:idx]
-	idx = 0
-	for _, elem := range actualReqFin.Curve {
-		if (elem & 0x0f0f) == 0x0a0a {
-			hasGrease = true
-		} else {
-			actualReqFin.Curve[idx] = elem
-			idx++
-		}
-	}
-	actualReqFin.Curve = actualReqFin.Curve[:idx]
-	if hasGrease {
+	hasGreaseCipher, greaseBound := detectGrease(actualReqFin.Cipher)
+	actualReqFin.Cipher = actualReqFin.Cipher[:greaseBound] // Remove grease ciphers
+
+	hasGreaseExtension, greaseBound := detectGrease(actualReqFin.Extension)
+	actualReqFin.Extension = actualReqFin.Extension[:greaseBound] // Remove grease extensions
+
+	hasGreaseCurve, greaseBound := detectGrease(actualReqFin.Curve)
+	actualReqFin.Curve = actualReqFin.Curve[:greaseBound] // Remove grease curves
+
+	if hasGreaseCipher || hasGreaseExtension || hasGreaseCurve {
 		actualReqFin.Quirk = append(actualReqFin.Quirk, "grease")
 	}
 
@@ -282,4 +260,18 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	}
 
 	return r
+}
+
+func detectGrease(list fp.IntList) (bool, int) {
+	hasGrease := false
+	idx := 0
+	for _, elem := range list {
+		if (elem & 0x0f0f) == 0x0a0a {
+			hasGrease = true
+		} else {
+			list[idx] = elem
+			idx++
+		}
+	}
+	return hasGrease, idx
 }

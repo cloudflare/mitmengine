@@ -128,6 +128,7 @@ func _TestProcessorCheck(t *testing.T, config *mitmengine.Config) {
 		out         mitmengine.Report
 	}{
 		{"", "::::::", mitmengine.Report{Error: mitmengine.ErrorUnknownUserAgent}},
+		{"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36", "0303:0a,2f,35,9c,9d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9:00,05,0a,0b,0d,10,12,17,1b,23,29,2b,2d,33,7550,ff01:1d,17,18:00:*:grease", mitmengine.Report{BrowserSignatureMatch: fp.MatchImpossible}},
 	}
 	a, _ := mitmengine.NewProcessor(config)
 	var userAgent ua.UserAgent
@@ -180,5 +181,17 @@ func _TestProcessorGetByRequestSignatureMitm(t *testing.T, config *mitmengine.Co
 			}
 		}
 		testutil.Assert(t, found, fmt.Sprintf("no record found with matching mitm info for '%s'", record.MitmInfo.NameList.String()))
+	}
+}
+
+func BenchmarkProcessor_Check(b *testing.B) {
+	testConfigFile := mitmengine.Config{
+		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
+		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
+		BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+	}
+	var t *testing.T
+	for n := 0; n < b.N; n++ {
+		_TestProcessorCheck(t, &testConfigFile)
 	}
 }
