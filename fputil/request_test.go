@@ -191,7 +191,8 @@ func TestRequestSignatureMatch(t *testing.T) {
 		testutil.Ok(t, err)
 		fingerprint, err := fp.NewRequestFingerprint(test.in2)
 		testutil.Ok(t, err)
-		testutil.Equals(t, signature.Match(fingerprint), test.out)
+		signatureMatch, _ := signature.Match(fingerprint)
+		testutil.Equals(t, signatureMatch, test.out)
 	}
 }
 

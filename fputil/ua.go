@@ -193,19 +193,19 @@ func (a *UAVersionSignature) Parse(s string) error {
 
 // minMatch returns true if fingerprint matches the min value
 func (a UAVersion) minMatch(fingerprint UAVersion) bool {
-	if a.Major == anyVersion || a.Major < fingerprint.Major {
+	if a.Major == anyVersion || a.Major <= fingerprint.Major {
 		return true
 	}
 	if a.Major > fingerprint.Major {
 		return false
 	}
-	if a.Minor == anyVersion || a.Minor < fingerprint.Minor {
+	if a.Minor == anyVersion || a.Minor <= fingerprint.Minor {
 		return true
 	}
 	if a.Minor > fingerprint.Minor {
 		return false
 	}
-	if a.Patch == anyVersion || a.Patch < fingerprint.Patch {
+	if a.Patch == anyVersion || a.Patch <= fingerprint.Patch {
 		return true
 	}
 	if a.Patch > fingerprint.Patch {
@@ -216,19 +216,19 @@ func (a UAVersion) minMatch(fingerprint UAVersion) bool {
 
 // maxMatch returns true if fingerprint matches the max value
 func (a UAVersion) maxMatch(fingerprint UAVersion) bool {
-	if a.Major == anyVersion || a.Major > fingerprint.Major {
+	if a.Major == anyVersion || a.Major >= fingerprint.Major {
 		return true
 	}
 	if a.Major < fingerprint.Major {
 		return false
 	}
-	if a.Minor == anyVersion || a.Minor > fingerprint.Minor {
+	if a.Minor == anyVersion || a.Minor >= fingerprint.Minor {
 		return true
 	}
 	if a.Minor < fingerprint.Minor {
 		return false
 	}
-	if a.Patch == anyVersion || a.Patch > fingerprint.Patch {
+	if a.Patch == anyVersion || a.Patch >= fingerprint.Patch {
 		return true
 	}
 	if a.Patch < fingerprint.Patch {
@@ -415,15 +415,19 @@ func (a UASignature) Merge(b UASignature) UASignature {
 // is possible with an unlikely configuration, and MatchPossible otherwise.
 func (a UASignature) Match(fingerprint UAFingerprint) Match {
 	if a.BrowserName != 0 && a.BrowserName != fingerprint.BrowserName {
+		//fmt.Println("1", fingerprint)
 		return MatchImpossible
 	}
 	if a.OSPlatform != 0 && a.OSPlatform != fingerprint.OSPlatform {
+		//fmt.Println("2", fingerprint)
 		return MatchImpossible
 	}
 	if a.OSName != 0 && a.OSName != fingerprint.OSName {
+		//fmt.Println("3", fingerprint)
 		return MatchImpossible
 	}
 	if a.DeviceType != 0 && a.DeviceType != fingerprint.DeviceType {
+		//fmt.Println("4", fingerprint)
 		return MatchImpossible
 	}
 
@@ -431,6 +435,7 @@ func (a UASignature) Match(fingerprint UAFingerprint) Match {
 	matchOSVersion := a.OSVersion.Match(fingerprint.OSVersion)
 	matchQuirk := a.Quirk.Match(fingerprint.Quirk)
 	if matchBrowserVersion == MatchImpossible || matchOSVersion == MatchImpossible || matchQuirk == MatchImpossible {
+		//fmt.Println("5", fingerprint)
 		return MatchImpossible
 	}
 	if matchBrowserVersion == MatchUnlikely || matchOSVersion == MatchUnlikely || matchQuirk == MatchUnlikely {
