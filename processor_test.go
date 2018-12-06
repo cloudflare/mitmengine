@@ -23,7 +23,7 @@ func TestProcessorConfigEmpty(t *testing.T) {
 
 func TestProcessorConfigFile(t *testing.T) {
 	testConfigFile := mitmengine.Config{
-		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
+		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser_clickhouse.txt"),
 		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
 		BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
 	}
@@ -127,8 +127,16 @@ func _TestProcessorCheck(t *testing.T, config *mitmengine.Config) {
 		fingerprint string
 		out         mitmengine.Report
 	}{
+		// Empty browser
 		{"", "::::::", mitmengine.Report{Error: mitmengine.ErrorUnknownUserAgent}},
-		{"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36", "0303:0a,2f,35,9c,9d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9:00,05,0a,0b,0d,10,12,17,1b,23,29,2b,2d,33,7550,ff01:1d,17,18:00:*:grease", mitmengine.Report{BrowserSignatureMatch: fp.MatchImpossible}},
+		// Microsoft Edge -- real browser fingerprint
+		{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134", "0303:c02c,c02b,c030,c02f,c024,c023,c028,c027,c00a,c009,c014,c013,9d,9c,3d,3c,35,2f,0a:00,05,0a,0b,0d,23,10,17,18,ff01:1d,17,18:00:*:", mitmengine.Report{BrowserSignatureMatch: fp.MatchPossible}},
+		// Chrome 70 -- real browser fingerprint
+		{"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36", "0303:0a,2f,35,9c,9d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9:00,05,0a,0b,0d,10,12,15,17,1b,23,2b,2d,33,7550,ff01:1d,17,18:00:*:grease", mitmengine.Report{BrowserSignatureMatch: fp.MatchPossible}},
+		// Chrome 49 -- real browser fingerprint
+		{"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36", "303:0a,2f,33,35,39,9c,9e,ff,c009,c00a,c013,c014,c02b,c02f,cc13,cc14,cc15,cca8:0,5,a,b,d,10,12,15,17,23,3374,7550,ff01:17,18:0:*:", mitmengine.Report{BrowserSignatureMatch: fp.MatchPossible}},
+		// MITM
+		{"Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", "303:c02b,c02f,c023,c027,c00a,c009,c014,c013,3d,3c,35,2f,a,ff:0,b,a,d:e,d,19,b,c,18,9,a,16,17,8,6,7,14,15,4,5,12,13,1,2,3,f,10,11:0,1,2:host,x-bluecoat-via:", mitmengine.Report{BrowserSignatureMatch: fp.MatchImpossible}},
 	}
 	a, _ := mitmengine.NewProcessor(config)
 	var userAgent ua.UserAgent
@@ -147,7 +155,7 @@ func _TestProcessorCheck(t *testing.T, config *mitmengine.Config) {
 		testutil.Ok(t, err)
 		actual := a.Check(uaFingerprint, test.rawUa, fingerprint)
 		testutil.Equals(t, test.out.Error, actual.Error)
-		testutil.Equals(t, test.out, actual)
+		testutil.Equals(t, test.out.BrowserSignatureMatch, actual.BrowserSignatureMatch)
 	}
 }
 
@@ -184,7 +192,7 @@ func _TestProcessorGetByRequestSignatureMitm(t *testing.T, config *mitmengine.Co
 	}
 }
 
-func BenchmarkProcessor_Check(b *testing.B) {
+func BenchmarkProcessorCheck(b *testing.B) {
 	testConfigFile := mitmengine.Config{
 		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
 		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),

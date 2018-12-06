@@ -152,15 +152,23 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 		return Report{Error: ErrorUnknownUserAgent}
 	}
 	var browserRecord db.Record
+	var maxSimilarity int
 	match := false
+
 	for _, id := range browserRecordIds {
-		browserRecord = a.BrowserDatabase.RecordMap[id]
-		if browserRecord.RequestSignature.Match(actualReqFin) == fp.MatchPossible {
+		tempRecord := a.BrowserDatabase.RecordMap[id]
+		recordMatch, similarity := tempRecord.RequestSignature.Match(actualReqFin)
+		if recordMatch == fp.MatchPossible {
 			match = true
+			browserRecord = tempRecord
 			break
+		} else { // else, if similarity of unmatched record is greater than previously saved similarity, save record
+			if similarity > maxSimilarity {
+				browserRecord = tempRecord
+				maxSimilarity = similarity
+			}
 		}
 	}
-	// use the first matched browser record, or otherwise the last browser record in the list
 	browserReqSig := browserRecord.RequestSignature
 
 	r.MatchedUASignature = browserRecord.UASignature.String()
@@ -175,7 +183,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	}
 
 	// Find the heuristics that flagged the connection as invalid
-	matchMap := browserReqSig.MatchMap(actualReqFin)
+	matchMap, _ := browserReqSig.MatchMap(actualReqFin)
 	var reason []string
 	var reasonDetails []string
 	switch {

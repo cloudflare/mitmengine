@@ -684,32 +684,40 @@ func (a StringSignature) Merge(b StringSignature) (merged StringSignature) {
 // Match a fingerprint against the signature.
 // Returns MatchImpossible if no match is possible, MatchUnlikely if the match
 // is possible with an unlikely configuration, and MatchPossible otherwise.
-func (a RequestSignature) Match(fingerprint RequestFingerprint) Match {
-	matchMap := a.MatchMap(fingerprint)
+func (a RequestSignature) Match(fingerprint RequestFingerprint) (Match, int) {
+	matchMap, similarity := a.MatchMap(fingerprint)
 	for _, v := range matchMap {
 		if v == MatchImpossible {
-			return MatchImpossible
+			return MatchImpossible, similarity
 		}
 	}
 	for _, v := range matchMap {
 		if v == MatchUnlikely {
-			return MatchUnlikely
+			return MatchUnlikely, similarity
 		}
 	}
-	return MatchPossible
+	return MatchPossible, similarity
 }
 
-// MatchMap returns a map of the match results of the fingerprint against the signature.
-func (a RequestSignature) MatchMap(fingerprint RequestFingerprint) map[string]Match {
+// MatchMap returns (1) a map of the match results of the fingerprint against the signature,
+// and (2) the count of overlapping cipher, extension, curve, and ecpointfmt values.
+// The second value helps a caller deduce the closest matching record in the case there is no "MatchPossible" match.
+func (a RequestSignature) MatchMap(fingerprint RequestFingerprint) (map[string]Match, int) {
 	matchMap := make(map[string]Match)
+	var similarity int
+	var matchcount int
 	matchMap["version"] = a.Version.Match(fingerprint.Version)
-	matchMap["cipher"] = a.Cipher.Match(fingerprint.Cipher)
-	matchMap["extension"] = a.Extension.Match(fingerprint.Extension)
-	matchMap["curve"] = a.Curve.Match(fingerprint.Curve)
-	matchMap["ecpointfmt"] = a.EcPointFmt.Match(fingerprint.EcPointFmt)
+	matchMap["cipher"], matchcount = a.Cipher.Match(fingerprint.Cipher)
+	similarity += matchcount
+	matchMap["extension"], matchcount = a.Extension.Match(fingerprint.Extension)
+	similarity += matchcount
+	matchMap["curve"], matchcount = a.Curve.Match(fingerprint.Curve)
+	similarity += matchcount
+	matchMap["ecpointfmt"], matchcount = a.EcPointFmt.Match(fingerprint.EcPointFmt)
+	similarity += matchcount
 	matchMap["header"] = a.Header.Match(fingerprint.Header)
 	matchMap["quirk"] = a.Quirk.Match(fingerprint.Quirk)
-	return matchMap
+	return matchMap, similarity
 }
 
 // Match a version against the version signature.
@@ -731,34 +739,37 @@ func (a VersionSignature) Match(version Version) Match {
 // Match an int list against the int signature.
 // Returns MatchImpossible if no match is possible, MatchUnlikely if the match
 // is possible with an unlikely configuration, and MatchPossible otherwise.
-func (a IntSignature) Match(list IntList) Match {
+func (a IntSignature) Match(list IntList) (Match, int) {
 	set := list.Set()
+	similarity := len(set.Inter(a.RequiredSet)) + len(set.Inter(a.OptionalSet))
+
+	//fmt.Println("similar count", similarity)
 	// check if the ordered list matches
 	if a.OrderedList != nil && !a.OrderedList.Contains(list) {
-		return MatchImpossible
+		return MatchImpossible, similarity
 	}
 	// check that the set does not contain any excluded items
 	if len(set.Inter(a.ExcludedSet)) > 0 {
-		return MatchImpossible
+		return MatchImpossible, similarity
 	}
 	// check that the set has all required items
 	if len(a.RequiredSet.Diff(set)) > 0 {
-		return MatchImpossible
+		return MatchImpossible, similarity
 	}
 	// see if there's anything left after removing required and optional items
 	set = set.Diff(a.RequiredSet).Diff(a.OptionalSet)
 	if a.OptionalSet != nil && len(set) > 0 {
 		// check if the remaining items are unlikely or impossible
 		if a.UnlikelySet != nil && len(set.Diff(a.UnlikelySet)) > 0 {
-			return MatchImpossible
+			return MatchImpossible, similarity
 		}
-		return MatchUnlikely
+		return MatchUnlikely, similarity
 	}
 	// check if the set has any unlikely items
 	if len(set.Inter(a.UnlikelySet)) > 0 {
-		return MatchUnlikely
+		return MatchUnlikely, similarity
 	}
-	return MatchPossible
+	return MatchPossible, similarity
 }
 
 // Match a string list against the string signature.

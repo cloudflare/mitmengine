@@ -78,7 +78,10 @@ func (a Database) Dump(output io.Writer) error {
 // GetByRequestFingerprint returns all records in the database matching the
 // request fingerprint.
 func (a Database) GetByRequestFingerprint(requestFingerprint fp.RequestFingerprint) []uint64 {
-	return a.GetBy(func(r Record) bool { return r.RequestSignature.Match(requestFingerprint) != fp.MatchImpossible })
+	return a.GetBy(func(r Record) bool {
+		match, _ := r.RequestSignature.Match(requestFingerprint)
+		return match != fp.MatchImpossible
+	})
 }
 
 // GetByUAFingerprint returns all records in the database matching the
