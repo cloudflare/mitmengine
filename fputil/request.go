@@ -743,7 +743,6 @@ func (a IntSignature) Match(list IntList) (Match, int) {
 	set := list.Set()
 	similarity := len(set.Inter(a.RequiredSet)) + len(set.Inter(a.OptionalSet))
 
-	//fmt.Println("similar count", similarity)
 	// check if the ordered list matches
 	if a.OrderedList != nil && !a.OrderedList.Contains(list) {
 		return MatchImpossible, similarity

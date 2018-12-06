@@ -119,14 +119,14 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	}
 
 	// Remove grease ciphers, extensions, and curves from request fingerprint and add as quirk instead.
-	hasGreaseCipher, greaseBound := detectGrease(actualReqFin.Cipher)
-	actualReqFin.Cipher = actualReqFin.Cipher[:greaseBound] // Remove grease ciphers
+	hasGreaseCipher, newSize := removeGrease(actualReqFin.Cipher)
+	actualReqFin.Cipher = actualReqFin.Cipher[:newSize] // Remove grease ciphers
 
-	hasGreaseExtension, greaseBound := detectGrease(actualReqFin.Extension)
-	actualReqFin.Extension = actualReqFin.Extension[:greaseBound] // Remove grease extensions
+	hasGreaseExtension, newSize := removeGrease(actualReqFin.Extension)
+	actualReqFin.Extension = actualReqFin.Extension[:newSize] // Remove grease extensions
 
-	hasGreaseCurve, greaseBound := detectGrease(actualReqFin.Curve)
-	actualReqFin.Curve = actualReqFin.Curve[:greaseBound] // Remove grease curves
+	hasGreaseCurve, newSize := removeGrease(actualReqFin.Curve)
+	actualReqFin.Curve = actualReqFin.Curve[:newSize] // Remove grease curves
 
 	if hasGreaseCipher || hasGreaseExtension || hasGreaseCurve {
 		actualReqFin.Quirk = append(actualReqFin.Quirk, "grease")
@@ -270,7 +270,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	return r
 }
 
-func detectGrease(list fp.IntList) (bool, int) {
+func removeGrease(list fp.IntList) (bool, int) {
 	hasGrease := false
 	idx := 0
 	for _, elem := range list {

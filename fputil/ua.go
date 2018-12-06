@@ -415,19 +415,15 @@ func (a UASignature) Merge(b UASignature) UASignature {
 // is possible with an unlikely configuration, and MatchPossible otherwise.
 func (a UASignature) Match(fingerprint UAFingerprint) Match {
 	if a.BrowserName != 0 && a.BrowserName != fingerprint.BrowserName {
-		//fmt.Println("1", fingerprint)
 		return MatchImpossible
 	}
 	if a.OSPlatform != 0 && a.OSPlatform != fingerprint.OSPlatform {
-		//fmt.Println("2", fingerprint)
 		return MatchImpossible
 	}
 	if a.OSName != 0 && a.OSName != fingerprint.OSName {
-		//fmt.Println("3", fingerprint)
 		return MatchImpossible
 	}
 	if a.DeviceType != 0 && a.DeviceType != fingerprint.DeviceType {
-		//fmt.Println("4", fingerprint)
 		return MatchImpossible
 	}
 
@@ -435,7 +431,6 @@ func (a UASignature) Match(fingerprint UAFingerprint) Match {
 	matchOSVersion := a.OSVersion.Match(fingerprint.OSVersion)
 	matchQuirk := a.Quirk.Match(fingerprint.Quirk)
 	if matchBrowserVersion == MatchImpossible || matchOSVersion == MatchImpossible || matchQuirk == MatchImpossible {
-		//fmt.Println("5", fingerprint)
 		return MatchImpossible
 	}
 	if matchBrowserVersion == MatchUnlikely || matchOSVersion == MatchUnlikely || matchQuirk == MatchUnlikely {

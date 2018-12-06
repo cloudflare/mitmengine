@@ -23,7 +23,7 @@ func TestProcessorConfigEmpty(t *testing.T) {
 
 func TestProcessorConfigFile(t *testing.T) {
 	testConfigFile := mitmengine.Config{
-		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser_clickhouse.txt"),
+		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
 		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
 		BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
 	}
