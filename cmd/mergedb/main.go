@@ -54,6 +54,7 @@ func main() {
 			// Don't automatically merge across these values
 			if !(r1.UASignature.BrowserName == r2.UASignature.BrowserName &&
 				r1.UASignature.OSName == r2.UASignature.OSName &&
+				r1.UASignature.OSVersion == r2.UASignature.OSVersion &&
 				r1.UASignature.DeviceType == r2.UASignature.DeviceType &&
 				r1.UASignature.Quirk.String() == r2.UASignature.Quirk.String() &&
 				r1.RequestSignature.Version.String() == r2.RequestSignature.Version.String() &&
