@@ -193,19 +193,19 @@ func (a *UAVersionSignature) Parse(s string) error {
 
 // minMatch returns true if fingerprint matches the min value
 func (a UAVersion) minMatch(fingerprint UAVersion) bool {
-	if a.Major == anyVersion || a.Major < fingerprint.Major {
+	if a.Major == anyVersion || a.Major <= fingerprint.Major {
 		return true
 	}
 	if a.Major > fingerprint.Major {
 		return false
 	}
-	if a.Minor == anyVersion || a.Minor < fingerprint.Minor {
+	if a.Minor == anyVersion || a.Minor <= fingerprint.Minor {
 		return true
 	}
 	if a.Minor > fingerprint.Minor {
 		return false
 	}
-	if a.Patch == anyVersion || a.Patch < fingerprint.Patch {
+	if a.Patch == anyVersion || a.Patch <= fingerprint.Patch {
 		return true
 	}
 	if a.Patch > fingerprint.Patch {
@@ -216,19 +216,19 @@ func (a UAVersion) minMatch(fingerprint UAVersion) bool {
 
 // maxMatch returns true if fingerprint matches the max value
 func (a UAVersion) maxMatch(fingerprint UAVersion) bool {
-	if a.Major == anyVersion || a.Major > fingerprint.Major {
+	if a.Major == anyVersion || a.Major >= fingerprint.Major {
 		return true
 	}
 	if a.Major < fingerprint.Major {
 		return false
 	}
-	if a.Minor == anyVersion || a.Minor > fingerprint.Minor {
+	if a.Minor == anyVersion || a.Minor >= fingerprint.Minor {
 		return true
 	}
 	if a.Minor < fingerprint.Minor {
 		return false
 	}
-	if a.Patch == anyVersion || a.Patch > fingerprint.Patch {
+	if a.Patch == anyVersion || a.Patch >= fingerprint.Patch {
 		return true
 	}
 	if a.Patch < fingerprint.Patch {
