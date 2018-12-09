@@ -1,6 +1,7 @@
 package fp_test
 
 import (
+	"fmt"
 	"testing"
 
 	fp "github.com/cloudflare/mitmengine/fputil"
@@ -9,7 +10,7 @@ import (
 
 var (
 	emptyVersionSig = fp.VersionSignature{}
-	emptyIntSig     = fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)}
+	emptyIntSig     = fp.IntSignature{fp.IntList{}, &fp.IntSet{}, &fp.IntSet{}, &fp.IntSet{}, &fp.IntSet{}}
 	emptyStringSig  = fp.StringSignature{
 		OrderedList: fp.StringList{},
 		OptionalSet: make(fp.StringSet),
@@ -112,6 +113,7 @@ func TestRequestSignatureMerge(t *testing.T) {
 	}
 }
 
+// todo fill this function out
 func TestVersionSignatureMerge(t *testing.T) {
 	var tests = []struct {
 		in1 string
@@ -143,11 +145,15 @@ func TestIntSignatureMerge(t *testing.T) {
 		{"1,2", "3,2,1", "~1,2,?3"},
 		{"1,2", "3,1,2", "?3,1,2"},
 	}
-	for _, test := range tests {
+	for i, test := range tests {
+		fmt.Println("TEST", i)
 		signature1, err := fp.NewIntSignature(test.in1)
 		testutil.Ok(t, err)
 		signature2, err := fp.NewIntSignature(test.in2)
 		testutil.Ok(t, err)
+		fmt.Printf("signature1 is %s\n", signature1.ExcludedSet.String())
+		fmt.Printf("signature2 is %s\n", signature2.ExcludedSet.String())
+		//fmt.Printf("merged is %s\n", signature1.Merge(signature2).String())
 		testutil.Equals(t, test.out, signature1.Merge(signature2).String())
 	}
 }

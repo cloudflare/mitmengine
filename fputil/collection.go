@@ -6,13 +6,17 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"golang.org/x/tools/container/intsets"
 )
 
 // IntList is a list of integers
-type IntList []uint64
+type IntList []int
 
 // IntSet is a set of integers
-type IntSet map[uint64]bool
+type IntSet struct {
+	intsets.Sparse
+}
 
 // NewIntList returns a string list parsed from a string.
 func NewIntList(s string) (IntList, error) {
@@ -32,7 +36,8 @@ func (a *IntList) Parse(s string) error {
 		if len(v) == 0 {
 			return fmt.Errorf("invalid int list format: '%s'", s)
 		}
-		elem, err := strconv.ParseUint(v, 16, 16)
+		elem64bit, err := strconv.ParseUint(v, 16, 16)
+		elem := int(elem64bit)
 		if err != nil {
 			return err
 		}
@@ -42,9 +47,9 @@ func (a *IntList) Parse(s string) error {
 }
 
 // String returns a comma-separated string of list elements
-func (a IntList) String() string {
+func (a *IntList) String() string {
 	var buf bytes.Buffer
-	for idx, elem := range a {
+	for idx, elem := range *a {
 		if idx != 0 {
 			buf.WriteString(",")
 		}
@@ -85,58 +90,60 @@ func (a IntList) Equals(b IntList) bool {
 }
 
 // Set returns a set representation of a list
-func (a IntList) Set() IntSet {
-	set := make(IntSet, len(a))
+func (a IntList) Set() *IntSet {
+	var set IntSet
 	for _, elem := range a {
-		set[elem] = true
+		set.Insert(elem)
 	}
-	return set
+	return &set
 }
 
 // List returns a list representation of a set in sorted order
-func (a IntSet) List() IntList {
-	list := make(IntList, len(a))
-	idx := 0
-	for elem := range a {
-		list[idx] = elem
-		idx++
+func (a *IntSet) List() IntList {
+	var list IntList
+	if a != nil {
+		list = a.AppendTo([]int{})
+		sort.Slice(list, func(i, j int) bool { return list[i] < list[j] })
 	}
-	sort.Slice(list, func(i, j int) bool { return list[i] < list[j] })
 	return list
 }
 
-// Inter returns the set intersection (a & b)
-func (a IntSet) Inter(b IntSet) IntSet {
-	inter := make(IntSet, len(a))
-	for elem := range a {
-		if b[elem] {
-			inter[elem] = true
-		}
+// Copy sets the value of IntSet a to the value of IntSet b.
+func (a *IntSet) Copy(b *IntSet) {
+	fmt.Println("in copy, a is", a)
+	fmt.Println("in copy, b is", b)
+	if a != nil && b != nil {
+		fmt.Println("copying!")
+		a.Sparse.Copy(&b.Sparse)
 	}
-	return inter
 }
 
-// Diff returns the set difference (a - b)
-func (a IntSet) Diff(b IntSet) IntSet {
-	diff := make(IntSet, len(a))
-	for elem := range a {
-		if !b[elem] {
-			diff[elem] = true
-		}
+// Inter returns the set intersection (a & b)
+func (a *IntSet) Inter(b *IntSet) *IntSet {
+	var inter IntSet
+	if a != nil && b != nil {
+		inter.Intersection(&a.Sparse, &b.Sparse)
 	}
-	return diff
+	return &inter
+}
+
+// Diff returns the set difference (a \ b)
+func (a *IntSet) Diff(b *IntSet) *IntSet {
+	var diff IntSet
+	if a != nil && b != nil {
+		diff.Difference(&a.Sparse, &b.Sparse)
+	}
+	return &diff
 }
 
 // Union returns the set union (a | b)
-func (a IntSet) Union(b IntSet) IntSet {
-	union := make(IntSet, len(a)+len(b))
-	for elem := range a {
-		union[elem] = true
+func (a *IntSet) Union(b *IntSet) *IntSet {
+	var union IntSet
+	// Need to use .Sparse to call intsets Union function, because our function has the same name.
+	if a != nil && b != nil {
+		union.Sparse.Union(&a.Sparse, &b.Sparse)
 	}
-	for elem := range b {
-		union[elem] = true
-	}
-	return union
+	return &union
 }
 
 // StringList is a list of strings
