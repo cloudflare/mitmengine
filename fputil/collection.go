@@ -110,10 +110,7 @@ func (a *IntSet) List() IntList {
 
 // Copy sets the value of IntSet a to the value of IntSet b.
 func (a *IntSet) Copy(b *IntSet) {
-	fmt.Println("in copy, a is", a)
-	fmt.Println("in copy, b is", b)
 	if a != nil && b != nil {
-		fmt.Println("copying!")
 		a.Sparse.Copy(&b.Sparse)
 	}
 }

@@ -543,17 +543,6 @@ func (a IntSignature) Merge(b IntSignature) (merged IntSignature) {
 	// 2) The order of elements in a and b must remain the same.
 	// 3) If there exists elements e1, e2 that appear in different orders
 	// in a and b, the merged list should be nil (accept any ordering).
-	fmt.Println("BEFORE MERGE A'S REQUIRED SET IS", a.RequiredSet.String())
-	fmt.Println("BEFORE MERGE A'S OPTIONAL SET IS", a.OptionalSet.String())
-	fmt.Println("BEFORE MERGE A'S EXCLUDED SET IS", a.ExcludedSet.String())
-	fmt.Println("BEFORE MERGE A'S UNLIKELY SET IS", a.UnlikelySet.String())
-	fmt.Println("BEFORE MERGE A'S ORDERED LIST IS", a.OrderedList)
-
-	fmt.Println("BEFORE MERGE B'S REQUIRED SET IS", b.RequiredSet.String())
-	fmt.Println("BEFORE MERGE B'S OPTIONAL SET IS", b.OptionalSet.String())
-	fmt.Println("BEFORE MERGE B'S EXCLUDED SET IS", b.ExcludedSet.String())
-	fmt.Println("BEFORE MERGE B'S UNLIKELY SET IS", b.UnlikelySet.String())
-	fmt.Println("BEFORE MERGE B'S ORDERED LIST IS", b.OrderedList)
 
 	merged = IntSignature{
 		IntList{},
@@ -573,17 +562,14 @@ func (a IntSignature) Merge(b IntSignature) (merged IntSignature) {
 		bIdx := 0
 		bLen := len(b.OrderedList)
 		for _, elem := range a.OrderedList {
-			fmt.Println(elem)
 			// check if elem is already merged
 			if mergedSet.Has(elem) {
 				// elem is already merged, so abort and accept any ordering
-				fmt.Println("ANY ORDER TRUE")
 				anyOrder = true
 				break
 			}
 			// check if b contains elem
 			if bSet.Has(elem) {
-				fmt.Println("bSet has elem!!")
 				// add all elems of b up to elem
 				for ; bIdx < bLen && b.OrderedList[bIdx] != elem; bIdx++ {
 					merged.OrderedList = append(merged.OrderedList, b.OrderedList[bIdx])
@@ -603,7 +589,6 @@ func (a IntSignature) Merge(b IntSignature) (merged IntSignature) {
 	// Clear ordered list if any ordering is accepted
 	if anyOrder {
 		merged.OrderedList = nil
-		fmt.Println(merged.OrderedList)
 	}
 
 	// Take intersection of required elems
@@ -616,33 +601,17 @@ func (a IntSignature) Merge(b IntSignature) (merged IntSignature) {
 		merged.ExcludedSet.Copy(a.ExcludedSet.Inter(b.ExcludedSet))
 	}
 
-	// Take union of optional elems
-	//if anyOrder && (a.OptionalSet.Len() == 0 || b.OptionalSet.Len() == 0) {
-	//	merged.OptionalSet = new(IntSet)
-	//} else {
-	//	merged.OptionalSet.Copy(a.OptionalSet.Union(b.OptionalSet).Union(a.RequiredSet).Union(b.RequiredSet).Diff(merged.RequiredSet))
-	//}
-	// todo... think about new optional set merging rules
+	// If intersection of a and b's RequiredSets is not empty (=> wildcard), then take union of optional elems
 	if a.RequiredSet.Len() != 0 && b.RequiredSet.Len() != 0 {
 		merged.OptionalSet.Copy(a.OptionalSet.Union(b.OptionalSet).Union(a.RequiredSet).Union(b.RequiredSet).Diff(merged.RequiredSet))
 	}
 
-	// Take union of unlikely elems
-	//if a.UnlikelySet.Len() == 0 || b.UnlikelySet.Len() == 0 {
-	//	merged.UnlikelySet = new(IntSet)
-	//} else {
-	//	merged.UnlikelySet.Copy(a.UnlikelySet.Union(b.UnlikelySet).Union(a.OptionalSet).Union(b.OptionalSet).Diff(merged.OptionalSet))
-	//}
-	// todo... think about new unlikely set merging rules
+	// If intersection of optional sets is not empty, then let the unmerged optional variables be considered unlikely
+	// variables.
 	if a.OptionalSet.Len() != 0 && b.OptionalSet.Len() != 0 {
 		merged.UnlikelySet.Copy(a.UnlikelySet.Union(b.UnlikelySet).Union(a.OptionalSet).Union(b.OptionalSet).Diff(merged.OptionalSet))
 	}
 
-	fmt.Println("AFTER MERGE REQUIRED SET IS", merged.RequiredSet.String())
-	fmt.Println("AFTER MERGE OPTIONAL SET IS", merged.OptionalSet.String())
-	fmt.Println("AFTER MERGE EXCLUDED SET IS", merged.ExcludedSet.String())
-	fmt.Println("AFTER MERGE UNLIKELY SET IS", merged.UnlikelySet.String())
-	fmt.Println("AFTER MERGE ORDERED LIST IS", merged.OrderedList)
 	return
 }
 
@@ -779,31 +748,31 @@ func (a VersionSignature) Match(version Version) Match {
 // is possible with an unlikely configuration, and MatchPossible otherwise.
 func (a IntSignature) Match(list IntList) (Match, int) {
 	set := list.Set()
-	similarity := len(set.Inter(a.RequiredSet)) + len(set.Inter(a.OptionalSet))
+	similarity := set.Inter(a.RequiredSet).Len() + set.Inter(a.OptionalSet).Len()
 
 	// check if the ordered list matches
 	if a.OrderedList != nil && !a.OrderedList.Contains(list) {
 		return MatchImpossible, similarity
 	}
 	// check that the set does not contain any excluded items
-	if len(set.Inter(a.ExcludedSet)) > 0 {
+	if set.Inter(a.ExcludedSet).Len() > 0 {
 		return MatchImpossible, similarity
 	}
 	// check that the set has all required items
-	if len(a.RequiredSet.Diff(set)) > 0 {
+	if a.RequiredSet.Diff(set).Len() > 0 {
 		return MatchImpossible, similarity
 	}
 	// see if there's anything left after removing required and optional items
-	set = set.Diff(a.RequiredSet).Diff(a.OptionalSet)
-	if a.OptionalSet != nil && len(set) > 0 {
+	set.Copy(set.Diff(a.RequiredSet).Diff(a.OptionalSet))
+	if a.OptionalSet.Len() != 0 && set.Len() > 0 {
 		// check if the remaining items are unlikely or impossible
-		if a.UnlikelySet != nil && len(set.Diff(a.UnlikelySet)) > 0 {
+		if a.UnlikelySet.Len () != 0 && set.Diff(a.UnlikelySet).Len() > 0 {
 			return MatchImpossible, similarity
 		}
 		return MatchUnlikely, similarity
 	}
 	// check if the set has any unlikely items
-	if len(set.Inter(a.UnlikelySet)) > 0 {
+	if set.Inter(a.UnlikelySet).Len() > 0 {
 		return MatchUnlikely, similarity
 	}
 	return MatchPossible, similarity
@@ -819,24 +788,24 @@ func (a StringSignature) Match(list StringList) Match {
 		return MatchImpossible
 	}
 	// check that the set does not contain any excluded items
-	if set.Inter(a.ExcludedSet).Len() > 0 {
+	if len(set.Inter(a.ExcludedSet)) > 0 {
 		return MatchImpossible
 	}
 	// check that the set has all required items
-	if a.RequiredSet.Diff(set).Len() > 0 {
+	if len(a.RequiredSet.Diff(set)) > 0 {
 		return MatchImpossible
 	}
 	// see if there's anything left after removing required and optional items
-	set.Copy(set.Diff(a.RequiredSet).Diff(a.OptionalSet))
-	if a.OptionalSet.Len() != 0 && set.Len() > 0 {
+	set = set.Diff(a.RequiredSet).Diff(a.OptionalSet)
+	if len(a.OptionalSet) != 0 && len(set) > 0 {
 		// check if the remaining items are unlikely or impossible
-		if a.UnlikelySet.Len() != 0 && set.Diff(a.UnlikelySet).Len() > 0 {
+		if a.UnlikelySet != nil && len(set.Diff(a.UnlikelySet)) > 0 {
 			return MatchImpossible
 		}
 		return MatchUnlikely
 	}
 	// check if the set has any unlikely items
-	if set.Inter(a.UnlikelySet).Len() > 0 {
+	if len(set.Inter(a.UnlikelySet)) > 0 {
 		return MatchUnlikely
 	}
 	return MatchPossible
