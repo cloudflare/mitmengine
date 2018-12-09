@@ -1,7 +1,6 @@
 package fp_test
 
 import (
-	"fmt"
 	"testing"
 
 	fp "github.com/cloudflare/mitmengine/fputil"
@@ -145,15 +144,11 @@ func TestIntSignatureMerge(t *testing.T) {
 		{"1,2", "3,2,1", "~1,2,?3"},
 		{"1,2", "3,1,2", "?3,1,2"},
 	}
-	for i, test := range tests {
-		fmt.Println("TEST", i)
+	for _, test := range tests {
 		signature1, err := fp.NewIntSignature(test.in1)
 		testutil.Ok(t, err)
 		signature2, err := fp.NewIntSignature(test.in2)
 		testutil.Ok(t, err)
-		fmt.Printf("signature1 is %s\n", signature1.ExcludedSet.String())
-		fmt.Printf("signature2 is %s\n", signature2.ExcludedSet.String())
-		//fmt.Printf("merged is %s\n", signature1.Merge(signature2).String())
 		testutil.Equals(t, test.out, signature1.Merge(signature2).String())
 	}
 }
@@ -255,7 +250,8 @@ func TestIntSignatureMatch(t *testing.T) {
 		testutil.Ok(t, err)
 		fingerprint, err := fp.NewIntList(test.in2)
 		testutil.Ok(t, err)
-		testutil.Equals(t, test.out, signature.Match(fingerprint))
+		match, _ := signature.Match(fingerprint)
+		testutil.Equals(t, test.out, match)
 	}
 }
 
