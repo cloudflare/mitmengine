@@ -69,10 +69,10 @@ func main() {
 				return true
 			}
 			// Do not merge if the merged signature is too lenient
-			if merged.Cipher.OrderedList == nil && len(merged.Cipher.OptionalSet) > 10 {
+			if merged.Cipher.OrderedList == nil && merged.Cipher.OptionalSet.Len() > 10 {
 				return false
 			}
-			if merged.Extension.OrderedList == nil && len(merged.Extension.OptionalSet) > 10 {
+			if merged.Extension.OrderedList == nil && merged.Extension.OptionalSet.Len() > 10 {
 				return false
 			}
 			return true

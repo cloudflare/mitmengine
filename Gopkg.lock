@@ -146,6 +146,14 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:6bb2e1cbcf253307a88a531a75aa4d38fecb8d56a0dc9e837e288fe3189954f6"
+  name = "golang.org/x/tools"
+  packages = ["container/intsets"]
+  pruneopts = "UT"
+  revision = "4c874b978acba4ecd4a257d3bb8829dd5de17be8"
+
+[[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -161,6 +169,7 @@
     "github.com/goamz/goamz/aws",
     "github.com/goamz/goamz/s3",
     "github.com/spf13/viper",
+    "golang.org/x/tools/container/intsets",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

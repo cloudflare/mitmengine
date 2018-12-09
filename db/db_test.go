@@ -48,9 +48,9 @@ func TestDatabaseGetByUAFingerprint(t *testing.T) {
 		{fp.UAFingerprint{BrowserName: 2}, []uint64(nil)},
 	}
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
-	a.Add(db.Record{UASignature: fp.UASignature{
-		BrowserName: 1,
-	}})
+	var record db.Record
+	record.Parse("1:0:0:0:0:0:|::::::|::")
+	a.Add(record)
 	for _, test := range tests {
 		testutil.Equals(t, test.out, a.GetByUAFingerprint(test.in))
 	}
@@ -62,13 +62,13 @@ func TestDatabaseGetByRequestFingerprint(t *testing.T) {
 		out []uint64
 	}{
 		{fp.RequestFingerprint{}, []uint64(nil)},
-		{fp.RequestFingerprint{Version: 1}, []uint64{0}},
+		{fp.RequestFingerprint{Version: fp.VersionTLS12}, []uint64{0}},
 		{fp.RequestFingerprint{Version: 2}, []uint64(nil)},
 	}
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
-	a.Add(db.Record{RequestSignature: fp.RequestSignature{
-		Version: fp.VersionSignature{Exp: 1, Min: 1, Max: 1},
-	}})
+	var record db.Record
+	record.Parse("1:0:0:0:0:0:|303::::::|::")
+	a.Add(record)
 	for _, test := range tests {
 		testutil.Equals(t, test.out, a.GetByRequestFingerprint(test.in))
 	}
