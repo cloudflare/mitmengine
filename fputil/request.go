@@ -748,6 +748,8 @@ func (a VersionSignature) Match(version Version) Match {
 // is possible with an unlikely configuration, and MatchPossible otherwise.
 func (a IntSignature) Match(list IntList) (Match, int) {
 	set := list.Set()
+
+	// Compute number of overlapping values between a and set to use as a "best match" metric if no exact match
 	similarity := set.Inter(a.RequiredSet).Len() + set.Inter(a.OptionalSet).Len()
 
 	// check if the ordered list matches
@@ -783,6 +785,7 @@ func (a IntSignature) Match(list IntList) (Match, int) {
 // is possible with an unlikely configuration, and MatchPossible otherwise.
 func (a StringSignature) Match(list StringList) Match {
 	set := list.Set()
+
 	// check if the ordered list matches
 	if a.OrderedList != nil && !a.OrderedList.Contains(list) {
 		return MatchImpossible
