@@ -249,7 +249,8 @@ func TestIntSignatureMatch(t *testing.T) {
 		testutil.Ok(t, err)
 		fingerprint, err := fp.NewIntList(test.in2)
 		testutil.Ok(t, err)
-		testutil.Equals(t, test.out, signature.Match(fingerprint))
+		match, _ := signature.Match(fingerprint)
+		testutil.Equals(t, test.out, match)
 	}
 }
 
