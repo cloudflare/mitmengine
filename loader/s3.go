@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -36,6 +37,14 @@ func NewS3Instance(configFileName string) (S3, error) {
 
 	accessKey := viper.GetString("AccessKey")
 	secretKey := viper.GetString("SecretKey")
+
+	// If keys not in config file, read from environment variables
+	if len(accessKey) == 0 {
+		accessKey = os.Getenv("AWS_ACCESS_KEY_ID")
+	}
+	if len(secretKey) == 0 {
+		secretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	}
 
 	auth, err := aws.GetAuth(strings.TrimSpace(string(accessKey)), strings.TrimSpace(string(secretKey)), "", time.Time{})
 	if err != nil {
