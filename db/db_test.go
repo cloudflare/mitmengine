@@ -22,30 +22,30 @@ func TestDatabaseLoad(t *testing.T) {
 
 func TestDatabaseAdd(t *testing.T) {
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
-	testutil.Equals(t, 0, len(a.RecordMap))
+	testutil.Equals(t, 0, a.Len())
 	a.Add(db.Record{})
-	testutil.Equals(t, 1, len(a.RecordMap))
+	testutil.Equals(t, 1, a.Len())
 	a.Add(db.Record{})
-	testutil.Equals(t, 2, len(a.RecordMap))
+	testutil.Equals(t, 2, a.Len())
 }
 
 func TestDatabaseClear(t *testing.T) {
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
 	a.Add(db.Record{})
 	a.Clear()
-	testutil.Equals(t, 0, len(a.RecordMap))
+	testutil.Equals(t, 0, a.Len())
 	a.Add(db.Record{})
-	testutil.Equals(t, 1, len(a.RecordMap))
+	testutil.Equals(t, 1, a.Len())
 }
 
 func TestDatabaseGetByUAFingerprint(t *testing.T) {
 	var tests = []struct {
 		in  fp.UAFingerprint
-		out []uint64
+		out []int
 	}{
-		{fp.UAFingerprint{}, []uint64(nil)},
-		{fp.UAFingerprint{BrowserName: 1}, []uint64{0}},
-		{fp.UAFingerprint{BrowserName: 2}, []uint64(nil)},
+		{fp.UAFingerprint{}, []int(nil)},
+		{fp.UAFingerprint{BrowserName: 1}, []int{0}},
+		{fp.UAFingerprint{BrowserName: 2}, []int(nil)},
 	}
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
 	var record db.Record
@@ -59,11 +59,11 @@ func TestDatabaseGetByUAFingerprint(t *testing.T) {
 func TestDatabaseGetByRequestFingerprint(t *testing.T) {
 	var tests = []struct {
 		in  fp.RequestFingerprint
-		out []uint64
+		out []int
 	}{
-		{fp.RequestFingerprint{}, []uint64(nil)},
-		{fp.RequestFingerprint{Version: fp.VersionTLS12}, []uint64{0}},
-		{fp.RequestFingerprint{Version: 2}, []uint64(nil)},
+		{fp.RequestFingerprint{}, []int(nil)},
+		{fp.RequestFingerprint{Version: fp.VersionTLS12}, []int{0}},
+		{fp.RequestFingerprint{Version: 2}, []int(nil)},
 	}
 	a, _ := db.NewDatabase(bytes.NewReader(nil))
 	var record db.Record
