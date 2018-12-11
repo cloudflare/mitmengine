@@ -155,7 +155,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 	match := false
 
 	for _, id := range browserRecordIds {
-		tempRecord := a.BrowserDatabase.RecordMap[id]
+		tempRecord := a.BrowserDatabase.Records[id]
 		recordMatch, similarity := tempRecord.RequestSignature.Match(actualReqFin)
 		if recordMatch == fp.MatchPossible {
 			match = true
@@ -259,7 +259,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 		if len(mitmRecordIds) == 0 {
 			break
 		}
-		mitmRecord := a.MitmDatabase.RecordMap[mitmRecordIds[0]]
+		mitmRecord := a.MitmDatabase.Records[mitmRecordIds[0]]
 		r.ActualGrade = r.ActualGrade.Merge(mitmRecord.MitmInfo.Grade)
 		r.MatchedMitmName = mitmRecord.MitmInfo.NameList.String()
 		r.MatchedMitmType = mitmRecord.MitmInfo.Type
