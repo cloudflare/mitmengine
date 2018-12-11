@@ -43,7 +43,7 @@ func main() {
 
 	var before, after int
 	if askUser(scanner, "Automatically merge browser database?") {
-		size := len(mitmProcessor.BrowserDatabase.RecordMap)
+		size := len(mitmProcessor.BrowserDatabase.Records)
 		total := size * size
 		count := 0
 		before, after = mitmProcessor.BrowserDatabase.MergeBy(func(r1, r2 db.Record) bool {

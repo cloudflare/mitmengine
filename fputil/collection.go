@@ -123,6 +123,18 @@ func (a *IntSet) Len() int {
 	return len
 }
 
+// IsEmpty a bool indicating whether two intsets are equal or not
+func (a *IntSet) Equal(b *IntSet) bool {
+	var equal bool
+	if a != nil && b != nil {
+		a.Lock()
+		b.Lock()
+		equal = a.Sparse.Equals(&b.Sparse)
+		b.Unlock()
+		a.Unlock()
+	}
+	return equal
+}
 
 // Has returns a bool indicating whether an intset actually contains the given elem or not.
 func (a *IntSet) Has(elem int) bool {
