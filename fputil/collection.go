@@ -108,7 +108,7 @@ func (a IntList) Set() *IntSet {
 // String stringifies an IntSet
 func (a *IntSet) String() string {
 	a.Lock()
-	// Make sure to call Sparse version of Has (or else you enter recursion!)
+	// Make sure to call Sparse version of String()
 	str := a.Sparse.String()
 	a.Unlock()
 	return str
@@ -117,7 +117,7 @@ func (a *IntSet) String() string {
 // Len returns the length of an IntSet.
 func (a *IntSet) Len() int {
 	a.Lock()
-	// Make sure to call Sparse implementation of Has (or else you enter recursion!)
+	// Make sure to call Sparse implementation of Len()
 	len := a.Sparse.Len()
 	a.Unlock()
 	return len
@@ -127,7 +127,7 @@ func (a *IntSet) Len() int {
 // Has returns a bool indicating whether an intset actually contains the given elem or not.
 func (a *IntSet) Has(elem int) bool {
 	a.Lock()
-	// Make sure to call Sparse implementation of Has (or else you enter recursion!)
+	// Make sure to call Sparse implementation of Has()
 	has := a.Sparse.Has(elem)
 	a.Unlock()
 	return has
@@ -136,7 +136,7 @@ func (a *IntSet) Has(elem int) bool {
 // IsEmpty a bool indicating whether an intset is empty or not.
 func (a *IntSet) IsEmpty() bool {
 	a.Lock()
-	// Make sure to call Sparse implementation of Has (or else you enter recursion!)
+	// Make sure to call Sparse implementation of IsEmpty()
 	empty := a.Sparse.IsEmpty()
 	a.Unlock()
 	return empty
