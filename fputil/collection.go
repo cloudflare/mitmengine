@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"golang.org/x/tools/container/intsets"
 )
@@ -16,6 +17,7 @@ type IntList []int
 // IntSet is a set of integers
 type IntSet struct {
 	intsets.Sparse
+	sync.Mutex
 }
 
 // NewIntList returns a string list parsed from a string.
@@ -98,11 +100,55 @@ func (a IntList) Set() *IntSet {
 	return &set
 }
 
+/*
+ * intset.Sparse is NOT thread-safe, so we must add locking for mitmengine's processor.Check() function
+ * to be run concurrently.
+ */
+
+// String stringifies an IntSet
+func (a *IntSet) String() string {
+	a.Lock()
+	// Make sure to call Sparse version of Has (or else you enter recursion!)
+	str := a.Sparse.String()
+	a.Unlock()
+	return str
+}
+
+// Len returns the length of an IntSet.
+func (a *IntSet) Len() int {
+	a.Lock()
+	// Make sure to call Sparse implementation of Has (or else you enter recursion!)
+	len := a.Sparse.Len()
+	a.Unlock()
+	return len
+}
+
+
+// Has returns a bool indicating whether an intset actually contains the given elem or not.
+func (a *IntSet) Has(elem int) bool {
+	a.Lock()
+	// Make sure to call Sparse implementation of Has (or else you enter recursion!)
+	has := a.Sparse.Has(elem)
+	a.Unlock()
+	return has
+}
+
+// IsEmpty a bool indicating whether an intset is empty or not.
+func (a *IntSet) IsEmpty() bool {
+	a.Lock()
+	// Make sure to call Sparse implementation of Has (or else you enter recursion!)
+	empty := a.Sparse.IsEmpty()
+	a.Unlock()
+	return empty
+}
+
 // List returns a list representation of a set in sorted order
 func (a *IntSet) List() IntList {
 	var list IntList
 	if a != nil {
+		a.Lock()
 		list = a.AppendTo([]int{})
+		a.Unlock()
 		sort.Slice(list, func(i, j int) bool { return list[i] < list[j] })
 	}
 	return list
@@ -111,7 +157,11 @@ func (a *IntSet) List() IntList {
 // Copy sets the value of IntSet a to the value of IntSet b.
 func (a *IntSet) Copy(b *IntSet) {
 	if a != nil && b != nil {
+		a.Lock()
+		b.Lock()
 		a.Sparse.Copy(&b.Sparse)
+		b.Unlock()
+		a.Unlock()
 	}
 }
 
@@ -119,7 +169,11 @@ func (a *IntSet) Copy(b *IntSet) {
 func (a *IntSet) Inter(b *IntSet) *IntSet {
 	var inter IntSet
 	if a != nil && b != nil {
+		a.Lock()
+		b.Lock()
 		inter.Intersection(&a.Sparse, &b.Sparse)
+		b.Unlock()
+		a.Unlock()
 	}
 	return &inter
 }
@@ -128,7 +182,11 @@ func (a *IntSet) Inter(b *IntSet) *IntSet {
 func (a *IntSet) Diff(b *IntSet) *IntSet {
 	var diff IntSet
 	if a != nil && b != nil {
+		a.Lock()
+		b.Lock()
 		diff.Difference(&a.Sparse, &b.Sparse)
+		b.Unlock()
+		a.Unlock()
 	}
 	return &diff
 }
@@ -138,7 +196,11 @@ func (a *IntSet) Union(b *IntSet) *IntSet {
 	var union IntSet
 	// Need to use .Sparse to call intsets Union function, because our function has the same name.
 	if a != nil && b != nil {
+		a.Lock()
+		b.Lock()
 		union.Sparse.Union(&a.Sparse, &b.Sparse)
+		b.Unlock()
+		a.Unlock()
 	}
 	return &union
 }

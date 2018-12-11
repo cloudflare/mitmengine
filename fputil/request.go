@@ -432,7 +432,7 @@ func (a IntSignature) String() string {
 		// element ordering is strict
 		list = a.OrderedList
 	} else {
-		if a.RequiredSet.Len() == 0 {
+		if a.RequiredSet.IsEmpty() {
 			buf.WriteByte(flagAnyItems)
 		} else {
 			buf.WriteByte(flagAnyOrder)
@@ -592,23 +592,23 @@ func (a IntSignature) Merge(b IntSignature) (merged IntSignature) {
 	}
 
 	// Take intersection of required elems
-	if a.RequiredSet.Len() != 0 || b.RequiredSet.Len() != 0 {
+	if !a.RequiredSet.IsEmpty()|| !b.RequiredSet.IsEmpty() {
 		merged.RequiredSet.Copy(a.RequiredSet.Inter(b.RequiredSet))
 	}
 
 	// Take intersection of excluded elems
-	if a.ExcludedSet.Len() != 0 || b.ExcludedSet.Len() != 0 {
+	if !a.ExcludedSet.IsEmpty() || !b.ExcludedSet.IsEmpty() {
 		merged.ExcludedSet.Copy(a.ExcludedSet.Inter(b.ExcludedSet))
 	}
 
 	// If intersection of a and b's RequiredSets is not empty (=> wildcard), then take union of optional elems
-	if a.RequiredSet.Len() != 0 && b.RequiredSet.Len() != 0 {
+	if !a.RequiredSet.IsEmpty() && !b.RequiredSet.IsEmpty() {
 		merged.OptionalSet.Copy(a.OptionalSet.Union(b.OptionalSet).Union(a.RequiredSet).Union(b.RequiredSet).Diff(merged.RequiredSet))
 	}
 
 	// If intersection of optional sets is not empty, then let the unmerged optional variables be considered unlikely
 	// variables.
-	if a.OptionalSet.Len() != 0 && b.OptionalSet.Len() != 0 {
+	if !a.OptionalSet.IsEmpty() && !b.OptionalSet.IsEmpty() {
 		merged.UnlikelySet.Copy(a.UnlikelySet.Union(b.UnlikelySet).Union(a.OptionalSet).Union(b.OptionalSet).Diff(merged.OptionalSet))
 	}
 
@@ -712,16 +712,16 @@ func (a RequestSignature) Match(fingerprint RequestFingerprint) (Match, int) {
 func (a RequestSignature) MatchMap(fingerprint RequestFingerprint) (map[string]Match, int) {
 	matchMap := make(map[string]Match)
 	var similarity int
-	var matchcount int
+	var matchCount int
 	matchMap["version"] = a.Version.Match(fingerprint.Version)
-	matchMap["cipher"], matchcount = a.Cipher.Match(fingerprint.Cipher)
-	similarity += matchcount
-	matchMap["extension"], matchcount = a.Extension.Match(fingerprint.Extension)
-	similarity += matchcount
-	matchMap["curve"], matchcount = a.Curve.Match(fingerprint.Curve)
-	similarity += matchcount
-	matchMap["ecpointfmt"], matchcount = a.EcPointFmt.Match(fingerprint.EcPointFmt)
-	similarity += matchcount
+	matchMap["cipher"], matchCount = a.Cipher.Match(fingerprint.Cipher)
+	similarity += matchCount
+	matchMap["extension"], matchCount = a.Extension.Match(fingerprint.Extension)
+	similarity += matchCount
+	matchMap["curve"], matchCount = a.Curve.Match(fingerprint.Curve)
+	similarity += matchCount
+	matchMap["ecpointfmt"], matchCount = a.EcPointFmt.Match(fingerprint.EcPointFmt)
+	similarity += matchCount
 	matchMap["header"] = a.Header.Match(fingerprint.Header)
 	matchMap["quirk"] = a.Quirk.Match(fingerprint.Quirk)
 	return matchMap, similarity
@@ -757,24 +757,24 @@ func (a IntSignature) Match(list IntList) (Match, int) {
 		return MatchImpossible, similarity
 	}
 	// check that the set does not contain any excluded items
-	if set.Inter(a.ExcludedSet).Len() > 0 {
+	if !set.Inter(a.ExcludedSet).IsEmpty() {
 		return MatchImpossible, similarity
 	}
 	// check that the set has all required items
-	if a.RequiredSet.Diff(set).Len() > 0 {
+	if !a.RequiredSet.Diff(set).IsEmpty() {
 		return MatchImpossible, similarity
 	}
 	// see if there's anything left after removing required and optional items
 	set.Copy(set.Diff(a.RequiredSet).Diff(a.OptionalSet))
-	if a.OptionalSet.Len() != 0 && set.Len() > 0 {
+	if !a.OptionalSet.IsEmpty() && !set.IsEmpty() {
 		// check if the remaining items are unlikely or impossible
-		if a.UnlikelySet.Len () != 0 && set.Diff(a.UnlikelySet).Len() > 0 {
+		if !a.UnlikelySet.IsEmpty() && !set.Diff(a.UnlikelySet).IsEmpty() {
 			return MatchImpossible, similarity
 		}
 		return MatchUnlikely, similarity
 	}
 	// check if the set has any unlikely items
-	if set.Inter(a.UnlikelySet).Len() > 0 {
+	if !set.Inter(a.UnlikelySet).IsEmpty() {
 		return MatchUnlikely, similarity
 	}
 	return MatchPossible, similarity

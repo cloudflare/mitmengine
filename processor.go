@@ -101,8 +101,7 @@ func LoadFile(fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
 // fields for the the brower specified by the supplied user agent, and return a
 // report including the mitm detection result, security details, and client
 // hello fingerprints.
-func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
-	actualReqFin fp.RequestFingerprint) Report {
+func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualReqFin fp.RequestFingerprint) Report {
 
 	// Add user agent fingerprint quirks.
 	if strings.Contains(rawUa, "Dragon/") {
