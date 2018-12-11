@@ -325,7 +325,7 @@ func _TestProcessorGetByUASignatureBrowser(t *testing.T, config *mitmengine.Conf
 	testutil.Ok(t, err)
 	a, err := db.NewDatabase(file)
 	testutil.Ok(t, err)
-	for _, record := range a.RecordMap {
+	for _, record := range a.Records {
 		uaFingerprint, err := uaSigToFin(record.UASignature)
 		testutil.Ok(t, err)
 		actual := a.GetByUAFingerprint(uaFingerprint)
@@ -338,14 +338,14 @@ func _TestProcessorGetByRequestSignatureMitm(t *testing.T, config *mitmengine.Co
 	testutil.Ok(t, err)
 	a, err := db.NewDatabase(file)
 	testutil.Ok(t, err)
-	for _, record := range a.RecordMap {
+	for _, record := range a.Records {
 		requestFingerprint, err := reqSigToFin(record.RequestSignature)
 		testutil.Ok(t, err)
 		actualRecordIds := a.GetByRequestFingerprint(requestFingerprint)
 		testutil.Assert(t, len(actualRecordIds) > 0, fmt.Sprintf("no records found for '%s'", requestFingerprint))
 		found := false
 		for _, id := range actualRecordIds {
-			if a.RecordMap[id].MitmInfo.Match(record.MitmInfo) != fp.MatchImpossible {
+			if a.Records[id].MitmInfo.Match(record.MitmInfo) != fp.MatchImpossible {
 				found = true
 			}
 		}
