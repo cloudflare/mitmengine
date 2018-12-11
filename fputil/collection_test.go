@@ -95,10 +95,10 @@ func TestIntListEquals(t *testing.T) {
 func TestIntListSet(t *testing.T) {
 	var tests = []struct {
 		in  fp.IntList
-		out fp.IntSet
+		out *fp.IntSet
 	}{
-		{fp.IntList{0}, fp.IntSet{0: true}},
-		{fp.IntList{1, 2, 3}, fp.IntSet{1: true, 2: true, 3: true}},
+		{fp.IntList{0}, fp.IntList{0}.Set()},
+		{fp.IntList{1, 2, 3}, fp.IntList{1, 2, 3}.Set()},
 	}
 
 	for _, test := range tests {
@@ -110,11 +110,12 @@ func TestIntListSet(t *testing.T) {
 // Test IntSet
 func TestIntSetList(t *testing.T) {
 	var tests = []struct {
-		in  fp.IntSet
+		in  *fp.IntSet
 		out fp.IntList
 	}{
-		{fp.IntSet{0: true}, fp.IntList{0}},
-		{fp.IntSet{1: true, 2: true, 3: true}, fp.IntList{1, 2, 3}},
+		{fp.IntList{}.Set(),fp.IntList{}},
+		{fp.IntList{0}.Set(), fp.IntList{0}},
+		{fp.IntList{1, 2, 3}.Set(), fp.IntList{1, 2, 3}},
 	}
 
 	for _, test := range tests {
@@ -125,49 +126,58 @@ func TestIntSetList(t *testing.T) {
 
 func TestIntSetInter(t *testing.T) {
 	var tests = []struct {
-		a   fp.IntSet
-		b   fp.IntSet
-		out fp.IntSet
+		a   *fp.IntSet
+		b   *fp.IntSet
+		out *fp.IntSet
 	}{
-		{fp.IntSet{0: true}, fp.IntSet{0: true}, fp.IntSet{0: true}},
-		{fp.IntSet{1: true, 2: true, 3: true}, fp.IntSet{2: true, 3: true, 4: true}, fp.IntSet{2: true, 3: true}},
+		{fp.IntList{}.Set(), fp.IntList{}.Set(), fp.IntList{}.Set()},
+		{fp.IntList{0}.Set(), fp.IntList{0}.Set(), fp.IntList{0}.Set()},
+		{fp.IntList{1, 2, 3}.Set(), fp.IntList{2, 3, 4}.Set(), fp.IntList{2, 3}.Set()},
 	}
 
 	for _, test := range tests {
 		actual := test.a.Inter(test.b)
-		testutil.Equals(t, test.out, actual)
+		// Use Equal function for sets, defined for intset.Sparse; deep equals (as defined in package testutil)
+		// does not handle intset.Sparse correctly
+		test.out.Equals(&actual.Sparse)
 	}
 }
 
 func TestIntSetDiff(t *testing.T) {
 	var tests = []struct {
-		a   fp.IntSet
-		b   fp.IntSet
-		out fp.IntSet
+		a   *fp.IntSet
+		b   *fp.IntSet
+		out *fp.IntSet
 	}{
-		{fp.IntSet{0: true}, fp.IntSet{0: true}, fp.IntSet{}},
-		{fp.IntSet{1: true, 2: true, 3: true}, fp.IntSet{2: true, 3: true, 4: true}, fp.IntSet{1: true}},
+		{fp.IntList{}.Set(), fp.IntList{}.Set(), fp.IntList{}.Set()},
+		{fp.IntList{0}.Set(), fp.IntList{0}.Set(), fp.IntList{}.Set()},
+		{fp.IntList{1, 2, 3}.Set(), fp.IntList{2, 3, 4}.Set(), fp.IntList{1}.Set()},
 	}
 
 	for _, test := range tests {
 		actual := test.a.Diff(test.b)
-		testutil.Equals(t, test.out, actual)
+		// Use Equal function for sets, defined for intset.Sparse; deep equals (as defined in package testutil)
+		// does not handle intset.Sparse correctly
+		test.out.Equals(&actual.Sparse)
 	}
 }
 
 func TestIntSetUnion(t *testing.T) {
 	var tests = []struct {
-		a   fp.IntSet
-		b   fp.IntSet
-		out fp.IntSet
+		a   *fp.IntSet
+		b   *fp.IntSet
+		out *fp.IntSet
 	}{
-		{fp.IntSet{0: true}, fp.IntSet{0: true}, fp.IntSet{0: true}},
-		{fp.IntSet{1: true, 2: true, 3: true}, fp.IntSet{2: true, 3: true, 4: true}, fp.IntSet{1: true, 2: true, 3: true, 4: true}},
+		{fp.IntList{}.Set(), fp.IntList{}.Set(), fp.IntList{}.Set()},
+		{fp.IntList{0}.Set(), fp.IntList{0}.Set(), fp.IntList{0}.Set()},
+		{fp.IntList{1, 2, 3}.Set(), fp.IntList{2, 3, 4}.Set(), fp.IntList{1, 2, 3, 4}.Set()},
 	}
 
 	for _, test := range tests {
 		actual := test.a.Union(test.b)
-		testutil.Equals(t, test.out, actual)
+		// Use Equal function for sets, defined for intset.Sparse; deep equals (as defined in package testutil)
+		// does not handle intset.Sparse correctly
+		test.out.Equals(&actual.Sparse)
 	}
 }
 

@@ -1,47 +1,49 @@
 package fp
 
-import "strings"
+import (
+	"strings"
+)
 
 // GlobalCipherCheck is available to external packages.
 var GlobalCipherCheck = NewCipherCheck()
 
 const (
-	tlsEmptyRenegotiationInfoSCSV uint64 = 0x00FF
+	tlsEmptyRenegotiationInfoSCSV int = 0x00FF
 )
 
 // CipherCheck maps ciphers to their assigned security grades
 type CipherCheck struct {
-	gradeA IntSet
-	gradeB IntSet
-	gradeC IntSet
-	gradeF IntSet
-	pfs    IntSet
-	grades map[uint64]Grade
+	gradeA *IntSet
+	gradeB *IntSet
+	gradeC *IntSet
+	gradeF *IntSet
+	pfs    *IntSet
+	grades map[int]Grade
 }
 
 // NewCipherCheck returns a new CipherCheck initialized with a list of ciphers
 func NewCipherCheck() CipherCheck {
 	a := CipherCheck{
-		gradeA: make(IntSet),
-		gradeB: make(IntSet),
-		gradeC: make(IntSet),
-		gradeF: make(IntSet),
-		pfs:    make(IntSet),
-		grades: make(map[uint64]Grade),
+		gradeA: new(IntSet),
+		gradeB: new(IntSet),
+		gradeC: new(IntSet),
+		gradeF: new(IntSet),
+		pfs:    new(IntSet),
+		grades: make(map[int]Grade),
 	}
 	for _, elem := range cipherCheckData {
 		switch elem.Grade {
 		case GradeA:
-			a.gradeA[elem.Cipher] = true
+			a.gradeA.Insert(elem.Cipher)
 		case GradeB:
-			a.gradeB[elem.Cipher] = true
+			a.gradeB.Insert(elem.Cipher)
 		case GradeC:
-			a.gradeC[elem.Cipher] = true
+			a.gradeC.Insert(elem.Cipher)
 		case GradeF:
-			a.gradeF[elem.Cipher] = true
+			a.gradeF.Insert(elem.Cipher)
 		}
 		if strings.Contains(elem.Name, "DHE") {
-			a.pfs[elem.Cipher] = true
+			a.pfs.Insert(elem.Cipher)
 		}
 		a.grades[elem.Cipher] = elem.Grade
 	}
@@ -51,7 +53,7 @@ func NewCipherCheck() CipherCheck {
 // AnyTriviallyBroken returns true if any of the ciphers is trivially broken
 func (a CipherCheck) AnyTriviallyBroken(cipherList IntList) bool {
 	for _, cipher := range cipherList {
-		if a.gradeF[cipher] {
+		if a.gradeF.Has(cipher) {
 			return true
 		}
 	}
@@ -61,7 +63,7 @@ func (a CipherCheck) AnyTriviallyBroken(cipherList IntList) bool {
 // AnyKnownAttack returns true if any of the ciphers is vulnerable to a known attack
 func (a CipherCheck) AnyKnownAttack(cipherList IntList) bool {
 	for _, cipher := range cipherList {
-		if a.gradeC[cipher] || a.gradeF[cipher] {
+		if a.gradeC.Has(cipher) || a.gradeF.Has(cipher) {
 			return true
 		}
 	}
@@ -107,13 +109,13 @@ func (a CipherCheck) IsFirstPfs(cipherList IntList) bool {
 		}
 		cipher = cipherList[1]
 	}
-	return a.pfs[cipher]
+	return a.pfs.Has(cipher)
 }
 
 // Source:
 //  - https://jhalderm.com/pub/papers/interception-ndss17.pdf
 var cipherCheckData = []struct {
-	Cipher uint64
+	Cipher int
 	Name   string
 	Grade  Grade
 }{

@@ -9,7 +9,7 @@ import (
 
 var (
 	emptyVersionSig = fp.VersionSignature{}
-	emptyIntSig     = fp.IntSignature{fp.IntList{}, make(fp.IntSet), make(fp.IntSet), make(fp.IntSet), make(fp.IntSet)}
+	emptyIntSig     = fp.IntSignature{fp.IntList{}, &fp.IntSet{}, &fp.IntSet{}, &fp.IntSet{}, &fp.IntSet{}}
 	emptyStringSig  = fp.StringSignature{
 		OrderedList: fp.StringList{},
 		OptionalSet: make(fp.StringSet),
@@ -112,6 +112,7 @@ func TestRequestSignatureMerge(t *testing.T) {
 	}
 }
 
+// todo fill this function out
 func TestVersionSignatureMerge(t *testing.T) {
 	var tests = []struct {
 		in1 string
