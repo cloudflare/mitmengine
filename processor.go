@@ -194,19 +194,19 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	case matchMap["cipher"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "invalid_cipher")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher.String()))
 	case matchMap["extension"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "invalid_extension")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension.String()))
 	case matchMap["curve"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "invalid_curve")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Curve, actualReqFin.Curve))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Curve, actualReqFin.Curve.String()))
 	case matchMap["ecpointfmt"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "invalid_ecpointfmt")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.EcPointFmt, actualReqFin.EcPointFmt))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.EcPointFmt, actualReqFin.EcPointFmt.String()))
 	case matchMap["header"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "invalid_header")
@@ -223,19 +223,19 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string,
 	case matchMap["cipher"] == fp.MatchUnlikely:
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_cipher")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher.String()))
 	case matchMap["extension"] == fp.MatchUnlikely:
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_extension")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension.String()))
 	case matchMap["curve"] == fp.MatchUnlikely:
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_curve")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Curve, actualReqFin.Curve))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Curve, actualReqFin.Curve.String()))
 	case matchMap["ecpointfmt"] == fp.MatchUnlikely:
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_ecpointfmt")
-		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.EcPointFmt, actualReqFin.EcPointFmt))
+		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.EcPointFmt, actualReqFin.EcPointFmt.String()))
 	case matchMap["header"] == fp.MatchUnlikely:
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_header")
