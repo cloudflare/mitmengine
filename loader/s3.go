@@ -30,6 +30,7 @@ func NewS3Instance(configFileName string) (S3, error) {
 	viper.SetConfigName(strings.Replace(configFileName, ".toml", "", -1))
 	viper.AddConfigPath("$GOPATH/src/github.com/cloudflare/mitmengine/loader")
 	viper.AddConfigPath("$GOPATH/src/github.com/cloudflare/mitmengine/")
+	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()
 	if err != nil {
 		return s3Instance, fmt.Errorf("fatal error config file: %s", err)
