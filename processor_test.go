@@ -172,7 +172,7 @@ func _TestProcessorCheckConcurrent(t *testing.T, config *mitmengine.Config) {
 	}
 	var tests = []testParam{
 		{"", "::::::", mitmengine.Report{Error: mitmengine.ErrorUnknownUserAgent}},
-    // The tests below are intended to force multiple lookups over the same value from db; this tests our locking over intsets stored in the db.
+		// The tests below are intended to force multiple lookups over the same value from db; this tests our locking over intsets stored in the db.
 		{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134", "0303:c02c,c02b,c030,c02f,c024,c023,c028,c027,c00a,c009,c014,c013,9d,9c,3d,3c,35,2f,0a:00,05,0a,0b,0d,23,10,17,18,ff01:1d,17,18:00:*:", mitmengine.Report{BrowserSignatureMatch: fp.MatchPossible}},
 		{"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36", "0303:0a,2f,35,9c,9d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9:00,05,0a,0b,0d,10,12,15,17,1b,23,2b,2d,33,7550,ff01:1d,17,18:00:*:grease", mitmengine.Report{BrowserSignatureMatch: fp.MatchPossible}},
 		{"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36", "0303:0a,2f,35,9c,9d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9:00,05,0a,0b,0d,10,12,15,17,1b,23,2b,2d,33,7550,ff01:1d,17,18:00:*:grease", mitmengine.Report{BrowserSignatureMatch: fp.MatchPossible}},
@@ -297,7 +297,7 @@ func _TestProcessorCheckConcurrent(t *testing.T, config *mitmengine.Config) {
 	var wg sync.WaitGroup
 	for _, test := range tests {
 		wg.Add(1)
-		go func(testP testParam){
+		go func(testP testParam) {
 			defer wg.Done()
 			var userAgent ua.UserAgent
 			ua.ParseUserAgent(testP.rawUa, &userAgent)
@@ -318,7 +318,6 @@ func _TestProcessorCheckConcurrent(t *testing.T, config *mitmengine.Config) {
 	}
 	wg.Wait()
 }
-
 
 func _TestProcessorGetByUASignatureBrowser(t *testing.T, config *mitmengine.Config) {
 	file, err := mitmengine.LoadFile(config.BrowserFileName, config.Loader)
@@ -364,7 +363,6 @@ func BenchmarkProcessorCheckSequential(b *testing.B) {
 		_TestProcessorCheckSequential(t, &testConfigFile)
 	}
 }
-
 
 func BenchmarkProcessorCheckConcurrent(b *testing.B) {
 	testConfigFile := mitmengine.Config{
