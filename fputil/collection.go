@@ -17,7 +17,7 @@ type IntList []int
 // IntSet is a set of integers
 type IntSet struct {
 	intsets.Sparse
-	sync.Mutex
+	sync.RWMutex
 }
 
 // NewIntList returns a string list parsed from a string.
@@ -109,10 +109,10 @@ func (a IntList) Set() *IntSet {
 func (a *IntSet) String() string {
 	str := ""
 	if a != nil {
-		a.Lock()
+		a.RLock()
 		// Make sure to call Sparse version of String()
 		str = a.Sparse.String()
-		a.Unlock()
+		a.RUnlock()
 	}
 	return str
 }
@@ -121,10 +121,10 @@ func (a *IntSet) String() string {
 func (a *IntSet) Len() int {
 	len := 0
 	if a != nil {
-		a.Lock()
+		a.RLock()
 		// Make sure to call Sparse implementation of Len()
 		len = a.Sparse.Len()
-		a.Unlock()
+		a.RUnlock()
 	}
 	return len
 }
@@ -132,9 +132,9 @@ func (a *IntSet) Len() int {
 // Inserts the given element into the IntSet.
 func (a *IntSet) Insert(elem int) {
 	if a != nil {
-		a.Lock()
+		a.RLock()
 		a.Sparse.Insert(elem)
-		a.Unlock()
+		a.RUnlock()
 	}
 }
 
@@ -142,11 +142,11 @@ func (a *IntSet) Insert(elem int) {
 func (a *IntSet) Equal(b *IntSet) bool {
 	var equal bool
 	if a != nil && b != nil {
-		a.Lock()
-		b.Lock()
+		a.RLock()
+		b.RLock()
 		equal = a.Sparse.Equals(&b.Sparse)
-		b.Unlock()
-		a.Unlock()
+		b.RUnlock()
+		a.RUnlock()
 	}
 	return equal
 }
@@ -155,10 +155,10 @@ func (a *IntSet) Equal(b *IntSet) bool {
 func (a *IntSet) Has(elem int) bool {
 	has := false
 	if a != nil {
-		a.Lock()
+		a.RLock()
 		// Make sure to call Sparse implementation of Has()
 		has = a.Sparse.Has(elem)
-		a.Unlock()
+		a.RUnlock()
 	}
 	return has
 }
@@ -167,10 +167,10 @@ func (a *IntSet) Has(elem int) bool {
 func (a *IntSet) IsEmpty() bool {
 	empty := false
 	if a != nil {
-		a.Lock()
+		a.RLock()
 		// Make sure to call Sparse implementation of IsEmpty()
 		empty = a.Sparse.IsEmpty()
-		a.Unlock()
+		a.RUnlock()
 	}
 	return empty
 }
