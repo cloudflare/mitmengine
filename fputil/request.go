@@ -115,7 +115,15 @@ func (a *RequestFingerprint) Parse(s string) error {
 
 // String returns a string representation of the fingerprint.
 func (a RequestFingerprint) String() string {
-	return strings.Join([]string{a.Version.String(), a.Cipher.String(), a.Extension.String(), a.Curve.String(), a.EcPointFmt.String(), a.Header.String(), a.Quirk.String()}, requestFieldSep)
+	return strings.Join([]string{
+		a.Version.String(),
+		a.Cipher.String(),
+		a.Extension.String(),
+		a.Curve.String(),
+		a.EcPointFmt.String(),
+		a.Header.String(),
+		a.Quirk.String(),
+	}, requestFieldSep)
 }
 
 // A RequestSignature represents a set of client request fingerprints. Many TLS/HTTPS
@@ -343,7 +351,7 @@ func (a *IntSignature) Parse(s string) error {
 		// allow any order and any optional items
 		// still check for required, unlikely, and excluded items
 		a.OrderedList = nil
-		a.OptionalSet = new(IntSet) // todo can replace with clear?
+		a.OptionalSet.Clear()
 	}
 	if anyOrder {
 		// allow any order
@@ -412,7 +420,15 @@ func (a *StringSignature) Parse(s string) error {
 
 // Returns a string representation of the signature.
 func (a RequestSignature) String() string {
-	return strings.Join([]string{a.Version.String(), a.Cipher.String(), a.Extension.String(), a.Curve.String(), a.EcPointFmt.String(), a.Header.String(), a.Quirk.String()}, requestFieldSep)
+	return strings.Join([]string{
+		a.Version.String(),
+		a.Cipher.String(),
+		a.Extension.String(),
+		a.Curve.String(),
+		a.EcPointFmt.String(),
+		a.Header.String(),
+		a.Quirk.String(),
+	}, requestFieldSep)
 }
 
 // Return a string representation of the version signature.
@@ -420,7 +436,11 @@ func (a VersionSignature) String() string {
 	if a.Min == a.Exp && a.Max == a.Exp {
 		return a.Exp.String()
 	}
-	return strings.Join([]string{a.Exp.String(), a.Min.String(), a.Max.String()}, fieldElemSep)
+	return strings.Join([]string{
+		a.Exp.String(),
+		a.Min.String(),
+		a.Max.String(),
+	}, fieldElemSep)
 }
 
 // String returns a string representation of the int signature.

@@ -107,20 +107,35 @@ func (a IntList) Set() *IntSet {
 
 // String stringifies an IntSet
 func (a *IntSet) String() string {
-	a.Lock()
-	// Make sure to call Sparse version of String()
-	str := a.Sparse.String()
-	a.Unlock()
+	str := ""
+	if a != nil {
+		a.Lock()
+		// Make sure to call Sparse version of String()
+		str = a.Sparse.String()
+		a.Unlock()
+	}
 	return str
 }
 
 // Len returns the length of an IntSet.
 func (a *IntSet) Len() int {
-	a.Lock()
-	// Make sure to call Sparse implementation of Len()
-	len := a.Sparse.Len()
-	a.Unlock()
+	len := 0
+	if a != nil {
+		a.Lock()
+		// Make sure to call Sparse implementation of Len()
+		len = a.Sparse.Len()
+		a.Unlock()
+	}
 	return len
+}
+
+// Inserts the given element into the IntSet.
+func (a *IntSet) Insert(elem int) {
+	if a != nil {
+		a.Lock()
+		a.Sparse.Insert(elem)
+		a.Unlock()
+	}
 }
 
 // IsEmpty a bool indicating whether two intsets are equal or not
@@ -138,20 +153,35 @@ func (a *IntSet) Equal(b *IntSet) bool {
 
 // Has returns a bool indicating whether an intset actually contains the given elem or not.
 func (a *IntSet) Has(elem int) bool {
-	a.Lock()
-	// Make sure to call Sparse implementation of Has()
-	has := a.Sparse.Has(elem)
-	a.Unlock()
+	has := false
+	if a != nil {
+		a.Lock()
+		// Make sure to call Sparse implementation of Has()
+		has = a.Sparse.Has(elem)
+		a.Unlock()
+	}
 	return has
 }
 
 // IsEmpty a bool indicating whether an intset is empty or not.
 func (a *IntSet) IsEmpty() bool {
-	a.Lock()
-	// Make sure to call Sparse implementation of IsEmpty()
-	empty := a.Sparse.IsEmpty()
-	a.Unlock()
+	empty := false
+	if a != nil {
+		a.Lock()
+		// Make sure to call Sparse implementation of IsEmpty()
+		empty = a.Sparse.IsEmpty()
+		a.Unlock()
+	}
 	return empty
+}
+
+// Clear empties an array.
+func (a *IntSet) Clear() {
+	if a != nil {
+		a.Lock()
+		a.Sparse.Clear()
+		a.Unlock()
+	}
 }
 
 // List returns a list representation of a set in sorted order
