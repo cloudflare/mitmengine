@@ -162,7 +162,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 			browserRecord = tempRecord
 			break
 		} else { // else, if similarity of unmatched record is greater than previously saved similarity, save record
-			if similarity > maxSimilarity {
+			if similarity >= maxSimilarity {
 				browserRecord = tempRecord
 				maxSimilarity = similarity
 			}
@@ -171,7 +171,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 	browserReqSig := browserRecord.RequestSignature
 
 	r.MatchedUASignature = browserRecord.UASignature.String()
-	r.BrowserSignature = browserRecord.RequestSignature.String()
+	r.BrowserSignature = browserReqSig.String()
 	r.BrowserGrade = browserReqSig.Grade()
 	r.ActualGrade = actualReqFin.Version.Grade().Merge(fp.GlobalCipherCheck.Grade(actualReqFin.Cipher))
 
