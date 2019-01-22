@@ -290,3 +290,13 @@ func TestStringSignatureMatch(t *testing.T) {
 		testutil.Equals(t, test.out, signature1.Match(signature2))
 	}
 }
+
+func TestGrade(t *testing.T) {
+	requestFingerprint := "0303:1301,1302,1303,c02b,c02f,c02c,c030,cca9,cca8,c013,c014,9c,9d,2f,35,0a:~00,17,ff01,0a,0b,23,10,05,0d,12,33,2d,2b,1b,15:1d,17,18:00:*:grease"
+	requestSignature, err := fp.NewRequestSignature(requestFingerprint)
+	if err != nil {
+		t.Fatal("request signature could not be parsed")
+	}
+	grade := requestSignature.Grade()
+	t.Log(grade)
+}
