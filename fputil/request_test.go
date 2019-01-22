@@ -298,5 +298,5 @@ func TestGrade(t *testing.T) {
 		t.Fatal("request signature could not be parsed")
 	}
 	grade := requestSignature.Grade()
-	t.Log(grade)
+	testutil.Equals(t, fp.GradeA, grade)
 }
