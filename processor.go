@@ -188,31 +188,31 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 	switch {
 	case matchMap["version"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_version")
+		reason = append(reason, "impossible_version")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Version, actualReqFin.Version))
 	case matchMap["cipher"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_cipher")
+		reason = append(reason, "impossible_cipher")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher.String()))
 	case matchMap["extension"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_extension")
+		reason = append(reason, "impossible_extension")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension.String()))
 	case matchMap["curve"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_curve")
+		reason = append(reason, "impossible_curve")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Curve, actualReqFin.Curve.String()))
 	case matchMap["ecpointfmt"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_ecpointfmt")
+		reason = append(reason, "impossible_ecpointfmt")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.EcPointFmt, actualReqFin.EcPointFmt.String()))
 	case matchMap["header"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_header")
+		reason = append(reason, "impossible_header")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Header, actualReqFin.Header))
 	case matchMap["quirk"] == fp.MatchImpossible:
 		r.BrowserSignatureMatch = fp.MatchImpossible
-		reason = append(reason, "invalid_quirk")
+		reason = append(reason, "impossible_quirk")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Quirk, actualReqFin.Quirk))
 	// put 'unlikely' reasons after 'impossible' reasons
 	case matchMap["version"] == fp.MatchUnlikely:
