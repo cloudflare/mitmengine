@@ -71,7 +71,7 @@ openssl s_server -www -cipher AES256-SHA -key server.pem -cert server.crt`
 ```
 - Start TShark capture to decrypt HTTP headers (TShark >= 3.0.0):
 ```
-tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -Y http > header.json`
+tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -e http.request.line -Y http > header.json`
 ```
 - Start TShark capture of TLS Client Hello:
 ```
