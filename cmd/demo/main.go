@@ -80,6 +80,5 @@ func main() {
 		OSVersion:      fp.UAVersion(ua.OS.Version),
 		DeviceType:     int(ua.DeviceType),
 	}
-	fmt.Println(uaFingerprint)
 	_ = mitmProcessor.Check(uaFingerprint, rawUa, requestFingerprint)
 }
