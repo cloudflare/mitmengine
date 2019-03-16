@@ -74,19 +74,19 @@ As browser and mitm fingerprints quickly become outdated, we are actively seekin
 
 - Create server RSA certificate and key pair:
 ```
-openssl req -new -x509 -out server.crt -nodes -keyout server.pem -subj /CN=localhost`
+openssl req -new -x509 -sha256 -out server.crt -nodes -keyout server.pem -subj /CN=localhost
 ```
 - Start server on port 4433:
 ```
-openssl s_server -www -cipher AES256-SHA -key server.pem -cert server.crt`
+openssl s_server -www -cipher AES256-SHA -key server.pem -cert server.crt
 ```
 - Start TShark capture to decrypt HTTP headers (TShark >= 3.0.0):
 ```
-tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -e http.request.line -Y http > header.json`
+tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -e http.request.line -Y http > header.json
 ```
 - Start TShark capture of TLS Client Hello:
 ```
-tshark -i loopback -f "tcp port 4433" -w handshake.pcap`
+tshark -i loopback -f "tcp port 4433" -w handshake.pcap
 ```
 - Visit `https://localhost:4433` from the TLS client you wish to fingerprint. For example,
 ```
