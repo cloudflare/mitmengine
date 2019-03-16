@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	requestFingerprint, err := fp.NewRequestFingerprint(string(requestFingerprintString))
+	requestFingerprint, err := fp.NewRequestFingerprint(strings.TrimSpace(string(requestFingerprintString)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,5 +80,24 @@ func main() {
 		OSVersion:      fp.UAVersion(ua.OS.Version),
 		DeviceType:     int(ua.DeviceType),
 	}
-	_ = mitmProcessor.Check(uaFingerprint, rawUa, requestFingerprint)
+	report := mitmProcessor.Check(uaFingerprint, rawUa, requestFingerprint)
+
+	// Print out human-readable report
+	if report.Error != nil {
+		fmt.Printf("MITM results inconclusive: %v\n", report.Error)
+		return
+	}
+	fmt.Printf("User agent fingerprint matched signature from database:\n\tua fp:\t%v\n\tua sig:\t%v\n", uaFingerprint, report.MatchedUASignature)
+	fmt.Printf("Expect request fingerprint to match request signature from database:\n\trq fp:\t%v\n\trq sig:\t%v\n\tmatch:\t%v", requestFingerprint, report.BrowserSignature, report.BrowserSignatureMatch)
+	if report.BrowserSignatureMatch == fp.MatchPossible {
+		fmt.Printf("\n")
+	} else {
+		fmt.Printf("\n\treason:\t%v\n", report.Reason)
+	}
+	fmt.Printf("Security report:\n\tbrowser grade:\t%v\n\tactual grade:\t%v\n\tweak ciphers:\t%v\n\tloses pfs:\t%v\n", report.BrowserGrade, report.ActualGrade, report.WeakCiphers, report.LosesPfs)
+	if len(report.MatchedMitmSignature) > 0 {
+		fmt.Printf("Request fingerprint matched known MITM signature:\n\trq sig:\t%v\n\tname:\t%v\n\ttype:\t%v\n", report.MatchedMitmSignature, report.MatchedMitmName, report.MatchedMitmType)
+	} else {
+		fmt.Printf("Request fingerprint did not match any known MITM signatures\n")
+	}
 }

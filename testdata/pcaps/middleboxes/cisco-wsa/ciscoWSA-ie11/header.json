@@ -1,0 +1,30 @@
+[
+  {
+    "_index": "packets-2016-02-16",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Connection: keep-alive\r\n",
+          "Accept: text/html, application/xhtml+xml, */*\r\n",
+          "Accept-Language: en-US\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Accept-Encoding: gzip, deflate\r\n",
+          "DNT: 1\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "X-IMForwards: 20\r\n",
+          "Via: 1.1 ciscowsa.test.aaspring-test.com:80 (Cisco-WSA/9.0.0-485)\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-16",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n",
+          "Upgrade-Insecure-Requests: 1\r\n",
+          "Accept-Language: en-US,en;q=0.8\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "Referer: http://echo-header.aaspring-test.com/\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Accept: */*\r\n",
+          "Accept-Language: en-US,en;q=0.8\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Pragma: no-cache\r\n",
+          "Cache-Control: no-cache\r\n",
+          "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n",
+          "Upgrade-Insecure-Requests: 1\r\n",
+          "Accept-Language: en-US,en;q=0.8\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "Referer: http://echo-header.aaspring-test.com/\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Pragma: no-cache\r\n",
+          "Cache-Control: no-cache\r\n",
+          "Accept: */*\r\n",
+          "Accept-Language: en-US,en;q=0.8\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]

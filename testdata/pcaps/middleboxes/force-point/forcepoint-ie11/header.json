@@ -1,0 +1,58 @@
+[
+  {
+    "_index": "packets-2016-02-07",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Accept: text/html, application/xhtml+xml, */*\r\n",
+          "Accept-Language: en-US\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Accept-Encoding: gzip, deflate\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "DNT: 1\r\n",
+          "Via: 1.1 hosted.websense 29n\r\n",
+          "X-Forwarded-For: 35.2.39.88\r\n",
+          "Client-IP: 35.2.39.88\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-07",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-07",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Accept: */*\r\n",
+          "UA-CPU: AMD64\r\n",
+          "Accept-Encoding: gzip, deflate\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "DNT: 1\r\n",
+          "Via: 1.1 hosted.websense 06n\r\n",
+          "X-Forwarded-For: 35.2.39.88\r\n",
+          "Client-IP: 35.2.39.88\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-07",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]
