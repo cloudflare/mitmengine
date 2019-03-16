@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/cloudflare/mitmengine.svg?branch=master)](https://travis-ci.org/cloudflare/mitmengine)
 
-The goal of this project is to allow for accurate detection of HTTPS interception and robust TLS fingerprinting. 
+The goal of this project is to allow for accurate detection of HTTPS interception and robust TLS fingerprinting.
 This project is based off of [The Security Impact of HTTPS Interception](https://zakird.com/papers/https_interception.pdf), and started as a port to Go of [their processing scripts and fingerprints](https://github.com/zakird/tlsfingerprints).
 
 ## Signature and Fingerprints
@@ -37,19 +37,68 @@ detect a mismatch. If the browser signatures are overly broad, we will also
 fail to detect interception.
 
 ## Testing
-To test, run ```make test``` and to see code coverage, run ```make cover```.
+To test, run `make test` and to see code coverage, run `make cover`.
 
 ## Godoc
-Run ```make godoc``` or ```PKG=<sub-package> make godoc``` to generate godoc for mitmengine or any of the sub-packages.
+Run `make godoc` or `PKG=<sub-package> make godoc` to generate godoc for mitmengine or any of the sub-packages.
 
 ## API
-First, a user must create a `mitmengine.Config` struct to pass into `mitmengine.NewProcessor`. A `mitmengine.Config` 
-struct can either specify filenames of files containing browser fingerprints, MITM fingerprints, and man-in-the-middle 
-headers. Alternatively, it can also specify a configuration file for reading the previously mentioned files from any 
-other source; right now, mitmengine supports reading these files from Amazon S3 client-compatible databases (including 
-Amazon S3 and Ceph). Additional file readers for databases (which we call "loaders") can be defined in the `loaders` 
-package, and as long as new loaders implement the Loader interface, they should work with the rest of mitmengine out of the 
-box. We added support for additional fingerprint and bad header sources in the case mitmengine is run as a daemon and 
+First, a user must create a `mitmengine.Config` struct to pass into `mitmengine.NewProcessor`. A `mitmengine.Config`
+struct can specify filenames of files containing browser fingerprints, MITM fingerprints, and MITM
+headers. Alternatively, it can also specify a configuration file for reading the previously mentioned files from any
+other source; right now, mitmengine supports reading these files from Amazon S3 client-compatible databases (including
+Amazon S3 and Ceph). Additional file readers for databases (which we call "loaders") can be defined in the `loaders`
+package, and as long as new loaders implement the Loader interface, they should work with the rest of mitmengine out of the
+box. We added support for additional fingerprint and bad header sources in the case mitmengine is run as a daemon and
 you want to have it periodically update the fingerprint and bad header files it uses to analyze traffic.
 
 The intended entrypoint to the mitmengine package is through the `Processor.Check` function, which takes a user agent and client request fingerprint, and returns a mitm detection report. Additional API functions will be added in the future to allow for adding new signatures to a running process, for example.
+
+## Example Usage
+An example use of the API is below. A more complete application is available at `cmd/demo/main.go`, and can be built by running `make bin/demo`.
+```
+rawUa := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
+requestFingerprintString := "303:dada,1301,1302,1303,c02b,c02f,c02c,c030,cca9,cca8,c013,c014,9c,9d,2f,35,a:aaaa,0,17,ff01,a,b,23,10,5,d,12,33,2d,2b,1b,dada,15:9a9a,1d,17,18:0::"
+uaFingerprintString := "1:72.0.3626:2:3:10.14.3:1:"
+requestFingerprint, _ := fp.NewRequestFingerprint(requestFingerprintString)
+uaFingerprint, _ := fp.NewUAFingerprint(uaFingerprintString)
+report := mitmProcessor.Check(uaFingerprint, rawUa, requestFingerprint)
+```
+
+## How to Contribute
+
+As browser and mitm fingerprints quickly become outdated, we are actively seeking to update the fingerprint repository with new samples. To contribute fingerprint samples, please follow these steps:
+
+### Generate a fingerprint sample
+(tested on macOS Mojave 10.14.3)
+
+- Create server RSA certificate and key pair:
+```
+openssl req -new -x509 -sha256 -out server.crt -nodes -keyout server.pem -subj /CN=localhost
+```
+- Start server on port 4433:
+```
+openssl s_server -www -cipher AES256-SHA -key server.pem -cert server.crt
+```
+- Start TShark capture to decrypt HTTP headers (TShark >= 3.0.0):
+```
+tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -e http.request.line -Y http > header.json
+```
+- Start TShark capture of TLS Client Hello:
+```
+tshark -i loopback -f "tcp port 4433" -w handshake.pcap
+```
+- Visit `https://localhost:4433` from the TLS client you wish to fingerprint. For example,
+```
+echo -e "GET /test HTTP/1.1\r\nHost:example.com\r\n\r\n" | openssl s_client -connect localhost:4433
+```
+
+### Submit a pull request
+- Generate a fingerprint sample (`header.json`, `handshake.pcap`) as described above, and place in the directory `testdata/pcaps/<desc>`, where `<desc>` is a unique and descriptive name.
+- Add a line to `testdata/fingerprint_metadata.jsonl` with the below fields. Recognized options for the `os`, `device`, `platform`, and `browser` fields are those defined in the `uasurfer` package. Recognized options for `mitm_fingerprint.type` are listed below. See `testdata/fingerprint_metadata.jsonl` for examples; any unknown fields can be left blank or omitted.
+```
+{ "desc": "<unique and descriptive name for sample>", "comment": "<additional information about the sample>", "handshake_pcap": "<path to pcap containing a TLS Client Hello>", "header_json": "<(optional) path to file containing the client HTTP request", "ua_fingerprint": {"raw_ua": "<raw user agent string>", "os": "<WindowsPhone|Windows|MacOSX|iOS|Android|...>", "os_version": "<major>.<minor>.<patch>", "device": "<Windows|Mac|Linux|...>", "platform": "<Computer|Tablet|Phone|...>", "browser": "<Chrome|IE|Safari|Firefox|...>", "browser_version": "<major>.<minor>.<patch>"}, "mitm_fingerprint": { "name": "<description of mitm>", "type": "<Antivirus|FakeBrowser|Malware|Parental|Proxy>" }}
+```
+- Submit a pull request with above changes.
+
+Other PRs and feature requests are welcome!

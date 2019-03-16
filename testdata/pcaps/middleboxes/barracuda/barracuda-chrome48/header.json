@@ -1,0 +1,32 @@
+[
+  {
+    "_index": "packets-2016-01-28",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Host: unencrypted.aaspring.xyz\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36\r\n",
+          "Accept: */*\r\n",
+          "Referer: http://unencrypted.aaspring.xyz/\r\n",
+          "Accept-Encoding: gzip, deflate, sdch\r\n",
+          "Accept-Language: en-US,en;q=0.8\r\n",
+          "Via: 1.1 barracuda.test3.aaspring.com (http_scan_byf/3.3.1)\r\n",
+          "CUDA_CLIIP: 141.212.111.238\r\n",
+          "X-Forwarded-For: 141.212.111.238\r\n",
+          "Cache-Control: max-age=259200\r\n",
+          "Connection: keep-alive\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-01-28",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]

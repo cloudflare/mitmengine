@@ -1,0 +1,28 @@
+[
+  {
+    "_index": "packets-2016-04-13",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Connection: keep-alive\r\n",
+          "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n",
+          "Upgrade-Insecure-Requests: 1\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36\r\n",
+          "Accept-Encoding: gzip, deflate, sdch\r\n",
+          "Accept-Language: en-US,en;q=0.8\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-04-13",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]
