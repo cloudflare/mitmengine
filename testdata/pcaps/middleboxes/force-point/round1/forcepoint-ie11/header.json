@@ -1,0 +1,58 @@
+[
+  {
+    "_index": "packets-2016-01-22",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Accept: text/html, application/xhtml+xml, */*\r\n",
+          "Accept-Language: en-US\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Accept-Encoding: gzip, deflate\r\n",
+          "Host: www.aaspring.xyz\r\n",
+          "DNT: 1\r\n",
+          "Via: 1.1 hosted.websense 02g\r\n",
+          "X-Forwarded-For: 141.212.111.238\r\n",
+          "Client-IP: 141.212.111.238\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-01-22",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-01-22",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Accept: */*\r\n",
+          "UA-CPU: AMD64\r\n",
+          "Accept-Encoding: gzip, deflate\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Host: www.aaspring.xyz\r\n",
+          "DNT: 1\r\n",
+          "Via: 1.1 hosted.websense 29g\r\n",
+          "X-Forwarded-For: 141.212.111.238\r\n",
+          "Client-IP: 141.212.111.238\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-01-22",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]

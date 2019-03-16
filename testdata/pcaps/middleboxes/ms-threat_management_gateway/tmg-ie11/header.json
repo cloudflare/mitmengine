@@ -1,0 +1,111 @@
+[
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Accept: text/html, application/xhtml+xml, */*\r\n",
+          "Accept-Language: en-US\r\n",
+          "DNT: 1\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Accept: */*\r\n",
+          "UA-CPU: AMD64\r\n",
+          "DNT: 1\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Accept: text/html, application/xhtml+xml, */*\r\n",
+          "Accept-Language: en-US\r\n",
+          "DNT: 1\r\n",
+          "Pragma: no-cache\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {
+        "http.request.line": [
+          "Via: 1.1 WIN-H1K4CE51KO8\r\n",
+          "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; Trident/7.0; rv:11.0) like Gecko\r\n",
+          "Host: echo-header.aaspring-test.com\r\n",
+          "Accept: */*\r\n",
+          "UA-CPU: AMD64\r\n",
+          "DNT: 1\r\n",
+          "Connection: Keep-Alive\r\n",
+          "Accept-Encoding: gzip\r\n"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "packets-2016-02-06",
+    "_type": "pcap_file",
+    "_score": null,
+    "_source": {
+      "layers": {}
+    }
+  }
+]
