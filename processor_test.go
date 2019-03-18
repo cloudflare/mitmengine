@@ -24,9 +24,9 @@ func TestProcessorConfigEmpty(t *testing.T) {
 
 func TestProcessorConfigFile(t *testing.T) {
 	testConfigFile := mitmengine.Config{
-		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
-		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
-		BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+		BrowserFileName:   filepath.Join("reference_fingerprints", "mitmengine", "browser.txt"),
+		MitmFileName:      filepath.Join("reference_fingerprints", "mitmengine", "mitm.txt"),
+		BadHeaderFileName: filepath.Join("reference_fingerprints", "mitmengine", "badheader.txt"),
 	}
 	t.Run("New", func(t *testing.T) { _, err := mitmengine.NewProcessor(&testConfigFile); testutil.Ok(t, err) })
 	t.Run("CheckSequential", func(t *testing.T) { _TestProcessorCheckSequential(t, &testConfigFile) })
@@ -76,7 +76,7 @@ func reqSigToFin(signature fp.RequestSignature) (fp.RequestFingerprint, error) {
 func _TestProcessorKnownBrowserFingerprints(t *testing.T, config *mitmengine.Config) {
 	a, _ := mitmengine.NewProcessor(config)
 
-	file, err := os.Open(filepath.Join("testdata", "browser_fingerprints.txt"))
+	file, err := os.Open(filepath.Join("reference_fingerprints", "browser_fingerprints.txt"))
 	testutil.Ok(t, err)
 	var record db.Record
 	scanner := bufio.NewScanner(file)
@@ -99,7 +99,7 @@ func _TestProcessorKnownBrowserFingerprints(t *testing.T, config *mitmengine.Con
 func _TestProcessorKnownMitmFingerprints(t *testing.T, config *mitmengine.Config) {
 	a, _ := mitmengine.NewProcessor(config)
 
-	file, err := os.Open(filepath.Join("testdata", "mitm_fingerprints.txt"))
+	file, err := os.Open(filepath.Join("reference_fingerprints", "mitm_fingerprints.txt"))
 	testutil.Ok(t, err)
 	var record db.Record
 	scanner := bufio.NewScanner(file)
@@ -354,9 +354,9 @@ func _TestProcessorGetByRequestSignatureMitm(t *testing.T, config *mitmengine.Co
 
 func BenchmarkProcessorCheckSequential(b *testing.B) {
 	testConfigFile := mitmengine.Config{
-		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
-		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
-		BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+		BrowserFileName:   filepath.Join("reference_fingerprints", "mitmengine", "browser.txt"),
+		MitmFileName:      filepath.Join("reference_fingerprints", "mitmengine", "mitm.txt"),
+		BadHeaderFileName: filepath.Join("reference_fingerprints", "mitmengine", "badheader.txt"),
 	}
 	var t *testing.T
 	for n := 0; n < b.N; n++ {
@@ -366,9 +366,9 @@ func BenchmarkProcessorCheckSequential(b *testing.B) {
 
 func BenchmarkProcessorCheckConcurrent(b *testing.B) {
 	testConfigFile := mitmengine.Config{
-		BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
-		MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
-		BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+		BrowserFileName:   filepath.Join("reference_fingerprints", "mitmengine", "browser.txt"),
+		MitmFileName:      filepath.Join("reference_fingerprints", "mitmengine", "mitm.txt"),
+		BadHeaderFileName: filepath.Join("reference_fingerprints", "mitmengine", "badheader.txt"),
 	}
 	var t *testing.T
 	for n := 0; n < b.N; n++ {

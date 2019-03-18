@@ -13,9 +13,9 @@ import (
 
 var outDir = filepath.Join("mergedb")
 var mitmConfig = mitmengine.Config{
-	BrowserFileName:   filepath.Join("testdata", "mitmengine", "browser.txt"),
-	MitmFileName:      filepath.Join("testdata", "mitmengine", "mitm.txt"),
-	BadHeaderFileName: filepath.Join("testdata", "mitmengine", "badheader.txt"),
+	BrowserFileName:   filepath.Join("reference_fingerprints", "mitmengine", "browser.txt"),
+	MitmFileName:      filepath.Join("reference_fingerprints", "mitmengine", "mitm.txt"),
+	BadHeaderFileName: filepath.Join("reference_fingerprints", "mitmengine", "badheader.txt"),
 }
 
 func askUser(scanner *bufio.Scanner, message string) bool {
