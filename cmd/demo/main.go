@@ -16,9 +16,9 @@ import (
 )
 
 func main() {
-	browserFileName := flag.String("browser", filepath.Join("testdata", "mitmengine", "browser.txt"), "File containing browser signatures")
-	mitmFileName := flag.String("mitm", filepath.Join("testdata", "mitmengine", "mitm.txt"), "File containing mitm signatures")
-	badHeaderFileName := flag.String("badheader", filepath.Join("testdata", "mitmengine", "badheader.txt"), "File containing non-browser (bad) HTTP headers")
+	browserFileName := flag.String("browser", filepath.Join("reference_fingerprintsta", "mitmengine", "browser.txt"), "File containing browser signatures")
+	mitmFileName := flag.String("mitm", filepath.Join("reference_fingerprintsta", "mitmengine", "mitm.txt"), "File containing mitm signatures")
+	badHeaderFileName := flag.String("badheader", filepath.Join("reference_fingerprintsta", "mitmengine", "badheader.txt"), "File containing non-browser (bad) HTTP headers")
 	handshakePcapFileName := flag.String("handshake", "handshake.pcap", "Pcap containing TLS Client Hello")
 	headerJsonFileName := flag.String("header", "header.json", "Json file containing HTTP headers")
 	flag.Parse()
