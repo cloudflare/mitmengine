@@ -16,11 +16,11 @@ import (
 )
 
 func main() {
-	browserFileName := flag.String("browser", filepath.Join("reference_fingerprintsta", "mitmengine", "browser.txt"), "File containing browser signatures")
-	mitmFileName := flag.String("mitm", filepath.Join("reference_fingerprintsta", "mitmengine", "mitm.txt"), "File containing mitm signatures")
-	badHeaderFileName := flag.String("badheader", filepath.Join("reference_fingerprintsta", "mitmengine", "badheader.txt"), "File containing non-browser (bad) HTTP headers")
-	handshakePcapFileName := flag.String("handshake", "handshake.pcap", "Pcap containing TLS Client Hello")
-	headerJsonFileName := flag.String("header", "header.json", "Json file containing HTTP headers")
+	browserFileName := flag.String("browser", filepath.Join("reference_fingerprints", "mitmengine", "browser.txt"), "File containing browser signatures")
+	mitmFileName := flag.String("mitm", filepath.Join("reference_fingerprints", "mitmengine", "mitm.txt"), "File containing mitm signatures")
+	badHeaderFileName := flag.String("badheader", filepath.Join("reference_fingerprints", "mitmengine", "badheader.txt"), "File containing non-browser (bad) HTTP headers")
+	handshakePcapFileName := flag.String("handshake", filepath.Join("reference_fingerprints", "pcaps", "misc", "ios5", "handshake.pcap"), "Pcap containing TLS Client Hello")
+	headerJsonFileName := flag.String("header", filepath.Join("reference_fingerprints", "pcaps", "middleboxes", "barracuda", "barracuda-chrome48", "header.json"), "Json file containing HTTP headers")
 	flag.Parse()
 
 	// Load config
@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Read in TLS Client Hello fingerprint
-	requestFingerprintString, err := exec.Command("scripts/pcap_to_request_fingerprint.py", *handshakePcapFileName).Output()
+	requestFingerprintString, err := exec.Command(filepath.Join("scripts", "pcap_to_request_fingerprint.py"), *handshakePcapFileName).Output()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,3 +1,4 @@
 .GOPATH
 bin/
 build/
+vendor/

@@ -16,6 +16,11 @@ Quick Links:
 - [How to Contribute](#how-to-contribute)
 - [mergeDB utility](#mergedb-utility)
 
+## Requirements
+
+- Go
+- Wireshark 3.0.0 (`wireshark -v` to check)
+
 ## Signature and Fingerprints
 In this project, fingerprints map to concrete instantiations of an object, while signatures can represent multiple objects. We use this convention because a fingerprint is usually an inherent property of an object, while a signature can be chosen. In the same way, an actual client request seen by a server would have a fingerprint, while the software generating the request can choose it's own signature (e.g., by choosing which cipher suites it supports).
 
@@ -48,11 +53,11 @@ detect a mismatch. If the browser signatures are overly broad, we will also
 fail to detect interception.
 
 ### Production fingerprints
-The reference browser and MITM software fingerprints used in [MALCOLM](https://malcolm.cloudflare.com) can be found in `reference_fingerprints/mitmengine/`. 
+The reference browser and MITM software fingerprints used in [MALCOLM](https://malcolm.cloudflare.com) can be found in `reference_fingerprints/mitmengine/`.
 This set of fingerprints is a combination of what is pulled from the TLS Client Hello pcaps in `reference_fingerprints/pcaps/`, as well as the top 500 User Agents + TLS Client Hello
 pairs observed on Cloudflare's network and labeled with a high trustworthiness rating (that is, traffic corresponding to human and friendly bot activity).
 
-Ideally, we don't have to rely on reference fingerprints sampled from Cloudflare's network; instead, we would have a comprehensive 
+Ideally, we don't have to rely on reference fingerprints sampled from Cloudflare's network; instead, we would have a comprehensive
 set of pcaps to build our set of reference TLS Client Hellos. Interested in helping us build out our dataset? See how [you can contribute](#submit-a-pull-request)!
 
 ## API
@@ -62,7 +67,7 @@ headers. Alternatively, it can also specify a configuration file for reading the
 other source; right now, MITMEngine supports reading these files from Amazon S3 client-compatible databases (including
 Amazon S3 and Ceph). Additional file readers for databases (which we call "loaders") can be defined in the `loaders`
 package, and as long as new loaders implement the Loader interface, they should work with the rest of MITMEngine out of the
-box. 
+box.
 
 The intended entrypoint to the MITMEngine package is through the `Processor.Check` function, which takes a User Agent and client request fingerprint, and returns a mitm detection report. Additional API functions will be added in the future to allow for adding new signatures to a running process, for example.
 
@@ -91,7 +96,7 @@ The uaFingerprint has the following format:
 An example of how to parse User Agents into the format for uaFingerprint is in the `cmd/demo/main.go` file.
 
 ## Building and Testing
-To use MITMEngine, remember to pull in its dependencies. 
+To use MITMEngine, remember to pull in its dependencies.
 You'll likely want to run vendoring or gomod logic before running tests on MITMEngine.
 
 To test, run `make test` and to see code coverage, run `make cover`.
