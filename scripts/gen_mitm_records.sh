@@ -6,7 +6,7 @@ req_header="<tls_version>:<cipher_suites>:<extension_names>:<curves>:<ec_point_f
 mitm_header="<mitm_name>:<mitm_type>:<mitm_grade>"
 echo "# ${ua_header}|${req_header}|${mitm_header}"
 
-pcaps=`find testdata/pcaps/antivirus-run2 -type f -name "handshake.pcap"`
+pcaps=`find reference_fingerprints/pcaps/antivirus-run2 -type f -name "handshake.pcap"`
 for pcapfile in $pcaps; do
 	scripts/filename_to_fingerprint.py --mitm $pcapfile
 done
