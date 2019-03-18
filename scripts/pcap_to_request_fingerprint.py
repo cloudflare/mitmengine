@@ -31,7 +31,7 @@ class RequestFingerprint:
             headers=",".join(self.headers), quirks=",".join(self.quirks)) 
 
     def parse(self, filename):
-        json_str = subprocess.run(["tshark", "-r", filename, "-Y", "tls.handshake.type == 1", "-T", "json",
+        tshark = subprocess.run(["tshark", "-r", filename, "-Y", "tls.handshake.type == 1", "-T", "json",
             "-e", "tls.record.version",
             "-e", "tls.handshake.version",
             "-e", "tls.handshake.ciphersuite",
@@ -39,7 +39,13 @@ class RequestFingerprint:
             "-e", "tls.handshake.extension.type",
             "-e", "tls.handshake.extensions_supported_group",
             "-e", "tls.handshake.extensions_ec_point_format",
-            "-e", "tls.handshake.sig_hash_alg"], capture_output=True, encoding='utf-8').stdout
+            "-e", "tls.handshake.sig_hash_alg"], capture_output=True, encoding='utf-8')
+
+        if tshark.returncode != 0:
+            print(tshark.stderr)
+            exit()
+
+        json_str = tshark.stdout
         pkts = json.loads(json_str)
         # use the last TLS Client Hello in the pcap
         record = pkts[-1]["_source"]["layers"]
