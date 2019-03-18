@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Read in TLS Client Hello fingerprint
-	requestFingerprintString, err := exec.Command("scripts/pcap_to_request_fingerprint.py", *handshakePcapFileName).Output()
+	requestFingerprintString, err := exec.Command(filepath.Join("scripts", "pcap_to_request_fingerprint.py"), *handshakePcapFileName).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
