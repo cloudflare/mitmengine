@@ -5,7 +5,7 @@
 The goal of this project is to allow for accurate detection of HTTPS interception and robust TLS fingerprinting.
 This project is based off of [The Security Impact of HTTPS Interception](https://zakird.com/papers/https_interception.pdf), and started as a port to Go of [their processing scripts and fingerprints](https://github.com/zakird/tlsfingerprints).
 
-More context about MITMEngine is available in this [Cloudflare blog post](https://blog.cloudflare.com/).
+More context about MITMEngine is available in this [Cloudflare blog post](https://blog.cloudflare.com/monsters-in-the-middleboxes/).
 
 Quick Links:
 - [Signatures and Fingerprints: Core Definitions](#signature-and-fingerprints)
