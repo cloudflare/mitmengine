@@ -3,12 +3,14 @@ package mitmengine_test
 import (
 	"bufio"
 	"fmt"
-	"github.com/cloudflare/mitmengine/loader"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 	"testing"
+
+	"github.com/cloudflare/mitmengine/loader"
 
 	ua "github.com/avct/uasurfer"
 	"github.com/cloudflare/mitmengine"
@@ -41,9 +43,25 @@ func TestProcessorConfigFile(t *testing.T) {
 // contributes additional loaders can either add additional testConfigs here and/or write similar
 // unit tests in the loader package.
 func TestProcessorConfigS3(t *testing.T) {
-	s3Instance, err := loader.NewS3Instance("s3cfg.toml")
+	variables := []string{
+		"AWS_SECRET_ACCESS_KEY",
+		"AWS_ACCESS_KEY_ID",
+		"AWS_ENDPOINT",
+		"AWS_BUCKET_NAME",
+	}
+	skip := false
+	for _, v := range variables {
+		if _, ok := os.LookupEnv(v); !ok {
+			skip = true
+		}
+	}
+	if skip {
+		t.Skipf("To run this test, set the following environment variables: %v", strings.Join(variables, ", "))
+	}
+
+	s3Instance, err := loader.NewS3Instance()
 	if err != nil {
-		t.Skip("s3cfg.toml either does not exist in project root directory or loader directory, or was malformed")
+		t.Fatalf("loader.NewS3Instance(): '%v'", err)
 	}
 	testConfigS3 := mitmengine.Config{
 		BrowserFileName:   "browser.txt",

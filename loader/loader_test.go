@@ -1,28 +1,35 @@
 package loader_test
 
 import (
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/cloudflare/mitmengine"
 	"github.com/cloudflare/mitmengine/loader"
-	"os"
-	"testing"
 )
 
 func TestProcessorConfigS3(t *testing.T) {
-	configFileName := "s3cfg.toml"
 
-	_, notInLocalDirErr := os.Stat("./" + configFileName)
-	_, notInProjectRootDirErr := os.Stat("../" + configFileName)
-
-	// This test will be a no-op if no s3cfg.toml file is provided in the loader directory or the project's
-	// root directory.
-	if os.IsNotExist(notInLocalDirErr) && os.IsNotExist(notInProjectRootDirErr) {
-		t.Skip(`No s3cfg.toml file found in project root directory
-($GOPATH/src/github.com/cloudflare/mitmengine) or loaders directory`)
+	variables := []string{
+		"AWS_SECRET_ACCESS_KEY",
+		"AWS_ACCESS_KEY_ID",
+		"AWS_ENDPOINT",
+		"AWS_BUCKET_NAME",
+	}
+	skip := false
+	for _, v := range variables {
+		if _, ok := os.LookupEnv(v); !ok {
+			skip = true
+		}
+	}
+	if skip {
+		t.Skipf("To run this test, set the following environment variables: %v", strings.Join(variables, ", "))
 	}
 
-	s3Instance, err := loader.NewS3Instance(configFileName)
+	s3Instance, err := loader.NewS3Instance()
 	if err != nil {
-		t.Fatal("Could not load s3 instance:", err)
+		t.Fatalf("loader.NewS3Instance(): '%v'", err)
 	}
 
 	testConfigS3 := mitmengine.Config{
