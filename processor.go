@@ -1,3 +1,6 @@
+// MITMEngine (monster-in-the-middle engine) is a library for detecting HTTPS
+// interception from the server's vantage point, and is based on heuristics
+// developed in https://zakird.com/papers/https_interception.pdf.
 package mitmengine
 
 import (
@@ -21,7 +24,7 @@ var (
 	ErrorUnknownUserAgent = errors.New("unknown_user_agent")
 )
 
-// A Processor generates heuristic-based man-in-the-middle (MiTM) detection
+// A Processor generates heuristic-based monster-in-the-middle (MITM) detection
 // reports for a TLS client hello and corresponding HTTP user agent.
 type Processor struct {
 	FileNameMap     map[string]string
