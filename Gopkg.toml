@@ -1,7 +1,0 @@
-[[constraint]]
-  branch = "master"
-  name = "github.com/avct/uasurfer"
-
-[prune]
-  go-tests = true
-  unused-packages = true

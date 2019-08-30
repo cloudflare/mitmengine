@@ -6,7 +6,6 @@ The goal of this project is to allow for accurate detection of HTTPS interceptio
 This project is based off of [The Security Impact of HTTPS Interception](https://zakird.com/papers/https_interception.pdf), and started as a port to Go of [their processing scripts and fingerprints](https://github.com/zakird/tlsfingerprints).
 
 More context about MITMEngine is available in this [Cloudflare blog post](https://blog.cloudflare.com/monsters-in-the-middleboxes/).
-
 Quick Links:
 - [Signatures and Fingerprints: Core Definitions](#signature-and-fingerprints)
 - [MITM Detection Methodology](#mitm-detection-methodology)
@@ -21,7 +20,14 @@ Quick Links:
 - Go
 - Wireshark 3.0.0 (`wireshark -v` to check)
 
-## Signature and Fingerprints
+## Documentation
+Detailed documentation lives with the code (copy package to $(GOPATH)/src/github.com/cloudflare/mitmengine first).
+
+	godoc -http=:6060
+
+http://localhost:6060/pkg/github.com/cloudflare/mitmengine
+
+### Signature and Fingerprints
 In this project, fingerprints map to concrete instantiations of an object, while signatures can represent multiple objects. We use this convention because a fingerprint is usually an inherent property of an object, while a signature can be chosen. In the same way, an actual client request seen by a server would have a fingerprint, while the software generating the request can choose it's own signature (e.g., by choosing which cipher suites it supports).
 
 ### Client Request
@@ -73,25 +79,21 @@ The intended entrypoint to the MITMEngine package is through the `Processor.Chec
 
 ## Example Usage
 An example use of the API is below. A more complete application is available at `cmd/demo/main.go`, and can be built by running `make bin/demo`.
-```
-rawUa := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
-requestFingerprintString := "303:dada,1301,1302,1303,c02b,c02f,c02c,c030,cca9,cca8,c013,c014,9c,9d,2f,35,a:aaaa,0,17,ff01,a,b,23,10,5,d,12,33,2d,2b,1b,dada,15:9a9a,1d,17,18:0::"
-uaFingerprintString := "1:72.0.3626:2:3:10.14.3:1:"
-requestFingerprint, _ := fp.NewRequestFingerprint(requestFingerprintString)
-uaFingerprint, _ := fp.NewUAFingerprint(uaFingerprintString)
-report := mitmProcessor.Check(uaFingerprint, rawUa, requestFingerprint)
-```
+
+	rawUa := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
+	requestFingerprintString := "303:dada,1301,1302,1303,c02b,c02f,c02c,c030,cca9,cca8,c013,c014,9c,9d,2f,35,a:aaaa,0,17,ff01,a,b,23,10,5,d,12,33,2d,2b,1b,dada,15:9a9a,1d,17,18:0::"
+	uaFingerprintString := "1:72.0.3626:2:3:10.14.3:1:"
+	requestFingerprint, _ := fp.NewRequestFingerprint(requestFingerprintString)
+	uaFingerprint, _ := fp.NewUAFingerprint(uaFingerprintString)
+	report := mitmProcessor.Check(uaFingerprint, rawUa, requestFingerprint)
 
 The TLS requestFingerprintString has the following format:
-```
-<tls_version>:<cipher_suites>:<extension_names>:<curves>:<ec_point_fmts>:<http_headers>:<quirks>
 
-```
+	<tls_version>:<cipher_suites>:<extension_names>:<curves>:<ec_point_fmts>:<http_headers>:<quirks>
 
 The uaFingerprint has the following format:
-```
-# <browser_name>:<browser_version>:<os_platform>:<os_name>:<os_version>:<device_type>:<quirks>
-```
+
+	# <browser_name>:<browser_version>:<os_platform>:<os_name>:<os_version>:<device_type>:<quirks>
 
 An example of how to parse User Agents into the format for uaFingerprint is in the `cmd/demo/main.go` file.
 
@@ -107,33 +109,33 @@ As browser and mitm fingerprints quickly become outdated, we are actively seekin
 ### Generate a fingerprint sample
 (tested on macOS Mojave 10.14.3)
 
-- Create server RSA certificate and key pair:
-```
-openssl req -new -x509 -sha256 -out server.crt -nodes -keyout server.pem -subj /CN=localhost
-```
-- Start server on port 4433:
-```
-openssl s_server -www -cipher AES256-SHA -key server.pem -cert server.crt
-```
-- Start TShark capture to decrypt HTTP headers (TShark >= 3.0.0):
-```
-tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -e http.request.line -Y http > header.json
-```
-- Start TShark capture of TLS Client Hello:
-```
-tshark -i loopback -f "tcp port 4433" -w handshake.pcap
-```
-- Visit `https://localhost:4433` from the TLS client you wish to fingerprint. For example,
-```
-echo -e "GET /test HTTP/1.1\r\nHost:example.com\r\n\r\n" | openssl s_client -connect localhost:4433
-```
+Create server RSA certificate and key pair:
+
+	openssl req -new -x509 -sha256 -out server.crt -nodes -keyout server.pem -subj /CN=localhost
+
+Start server on port 4433:
+
+	openssl s_server -www -cipher AES256-SHA -key server.pem -cert server.crt
+
+Start TShark capture to decrypt HTTP headers (TShark >= 3.0.0):
+
+	tshark -i loopback -o tls.keys_list:"127.0.0.1,4433,http,server.pem" -Tjson -e http.request.line -Y http > header.json
+
+Start TShark capture of TLS Client Hello:
+
+	tshark -i loopback -f "tcp port 4433" -w handshake.pcap
+
+Visit `https://localhost:4433` from the TLS client you wish to fingerprint. For example,
+
+	echo -e "GET /test HTTP/1.1\r\nHost:example.com\r\n\r\n" | openssl s_client -connect localhost:4433
+
 
 ### Submit a pull request
 - Generate a fingerprint sample (`header.json`, `handshake.pcap`) as described above, and place in the directory `reference_fingerprints/pcaps/<desc>`, where `<desc>` is a unique and descriptive name.
 - Add a line to `reference_fingerprints/fingerprint_metadata.jsonl` with the below fields. Recognized options for the `os`, `device`, `platform`, and `browser` fields are those defined in the `uasurfer` package. Recognized options for `mitm_fingerprint.type` are listed below. See `reference_fingerprints/fingerprint_metadata.jsonl` for examples; any unknown fields can be left blank or omitted.
-```
-{ "desc": "<unique and descriptive name for sample>", "comment": "<additional information about the sample>", "handshake_pcap": "<path to pcap containing a TLS Client Hello>", "header_json": "<(optional) path to file containing the client HTTP request", "ua_fingerprint": {"raw_ua": "<raw User Agent string>", "os": "<WindowsPhone|Windows|MacOSX|iOS|Android|...>", "os_version": "<major>.<minor>.<patch>", "device": "<Windows|Mac|Linux|...>", "platform": "<Computer|Tablet|Phone|...>", "browser": "<Chrome|IE|Safari|Firefox|...>", "browser_version": "<major>.<minor>.<patch>"}, "mitm_fingerprint": { "name": "<description of mitm>", "type": "<Antivirus|FakeBrowser|Malware|Parental|Proxy>" }}
-```
+
+	{ "desc": "<unique and descriptive name for sample>", "comment": "<additional information about the sample>", "handshake_pcap": "<path to pcap containing a TLS Client Hello>", "header_json": "<(optional) path to file containing the client HTTP request", "ua_fingerprint": {"raw_ua": "<raw User Agent string>", "os": "<WindowsPhone|Windows|MacOSX|iOS|Android|...>", "os_version": "<major>.<minor>.<patch>", "device": "<Windows|Mac|Linux|...>", "platform": "<Computer|Tablet|Phone|...>", "browser": "<Chrome|IE|Safari|Firefox|...>", "browser_version": "<major>.<minor>.<patch>"}, "mitm_fingerprint": { "name": "<description of mitm>", "type": "<Antivirus|FakeBrowser|Malware|Parental|Proxy>" }}
+
 - Submit a pull request with above changes.
 
 Other PRs and feature requests are welcome!
@@ -141,7 +143,7 @@ Other PRs and feature requests are welcome!
 ## mergeDB Utility
 mergeDB (in `cmd/mergedb`) is a utility for merging similar TLS ClientHello fingerprints across multiple close versions of browsers or MITM software.
 Use mergeDB to consolidate large lists of User Agent / Client Hello fingerprints:
-```
-go run cmd/mergedb/main.go
-```
+
+	go run cmd/mergedb/main.go
+
 By default, mergeDB will run on the fingerprints in the `reference_fingerprints/mitmengine` directory.
