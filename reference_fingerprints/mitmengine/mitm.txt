@@ -121,11 +121,3 @@
 0::0:0::0:|:*:*:*:*:*xroxy-connection:*|Kerio-Winroute-Firewall:0:0
 0::0:0::0:|:*:*:*:*:*z-forwarded-for:*|Zscaler:0:0
 0::0:0::0:|:*:*:25,24,23:*:*client-ip,x-forwarded-for:*|Forcepoint/WebSense:5:0
-# add signatures based on quirks that none of the supported browsers should ever have
-0::0:0::0:|:*:*:*:*:*:*badhost|:0:0
-0::0:0::0:|:*:*:*:*:*:*badcase|:0:0
-0::0:0::0:|:*:*:*:*:*:*badpath|:0:0
-0::0:0::0:|:*:*:*:*:*:*badspace|:0:0
-0::0:0::0:|:*:*:*:*:*:*badreferer|:0:0
-0::0:0::0:|:*:*:*:*:*:*badxff|:0:0
-0::0:0::0:|:*:*:*:*:*:*badhdr|:0:0
