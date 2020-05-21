@@ -97,6 +97,24 @@ The uaFingerprint has the following format:
 
 An example of how to parse User Agents into the format for uaFingerprint is in the `cmd/demo/main.go` file.
 
+## Webserver Integration API
+
+An alternate entrypoint to the MITMEngine, `Processor.CheckRequest`,  is also available which is designed to integrate directly with webservers. It eliminates the need for users to build compatible request fingerprint strings or User-Agent fingerprint strings. It generates the needed signatures from a [*tls.ClientHelloInfo](https://golang.org/pkg/crypto/tls/#ClientHelloInfo) and a [*http.Request](https://golang.org/pkg/net/http/#Request). It returns a mitm detection report.
+
+**_NOTE:_** The tradeoff for ease-of-use is that CheckRequest() lacks visibility into the set of TLS extensions advertised by the client, lacks custom tagging of client quirks, and assumes the connection is using the highest advertised TLS version. This is due to limitations in what the tls.ClientHelloInfo structure exposes. If you want full functionality, use Check().
+
+A simple webserver using this entrypoint is provided at `cmd/webserver_integration_demo/main.go` and can be compiled with:
+
+	make bin/webserver_integration_demo 
+
+This will also use `openssl` to create a self-signed TLS certificate and private key for testing in `/bin` for convenience. The server may be run with:
+
+	./bin/webserver_integration_demo
+
+You can then send requests to https://localhost:8443 and see the mitm report rendered with some HTML formatting. Note that the self-signed certificate will be (rightly) rejected by clients by default.
+
+If the report indicates that your client or MITM is not recognized by mitmengine's reference fingerprint set (e.g. `ERROR: unknown_user_agent`), consider [contributing new fingerprints](#how-to-contribute) to our set of reference fingerprints.
+
 ## Building and Testing
 To use MITMEngine, remember to pull in its dependencies.
 You'll likely want to run vendoring or gomod logic before running tests on MITMEngine.
