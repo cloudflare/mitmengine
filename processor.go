@@ -6,11 +6,13 @@ package mitmengine
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -100,12 +102,43 @@ func LoadFile(fileName string, dbReader loader.Loader) (io.ReadCloser, error) {
 	return file, readErr
 }
 
+// Like Check() except that it extracts
+// necessary information from standard http.Request and tls.ClientHelloInfo
+// structures for straightforward use in webservers. Due to the limited
+// information on TLS extensions in these structures, this option will not
+// check the plausibility of TLS extensions used. Also, this function will take
+// the highest supported standard TLS version in clientHello.SupportedVersions
+// because it cannot see the actual TLS version in use by the TLS connection.
+// If either of these differences is an issue, use Check() instead.
+func (a *Processor) CheckRequest(httpRequest *http.Request, clientHello *tls.ClientHelloInfo) (Report) {
+
+	// Fingerprint the request
+	actualReqFin, err := fp.FingerprintClientHello(clientHello, httpRequest)
+	if err != nil {
+		return Report{
+			Error: err,
+		}
+	}
+
+	// Parse the UserAgent
+	rawUa := httpRequest.UserAgent()
+	uaFingerprint := fp.UAFingerprintFromUserAgentString(rawUa)
+
+	// Check and generate report
+	return a.check(uaFingerprint, rawUa, actualReqFin, false)
+}
+
 // Check if the supplied client hello fields match the expected client hello
-// fields for the the brower specified by the supplied user agent, and return a
+// fields for the the browser specified by the supplied user agent, and return a
 // report including the mitm detection result, security details, and client
 // hello fingerprints.
 func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualReqFin fp.RequestFingerprint) Report {
+	return a.check(uaFingerprint, rawUa, actualReqFin, true)
+}
 
+// Implements Check() with the option of ignoring TLS extensions for 
+// webservers without access to them as in CheckRequest().
+func (a *Processor) check(uaFingerprint fp.UAFingerprint, rawUa string, actualReqFin fp.RequestFingerprint, useExtensions bool) Report {
 	// Add user agent fingerprint quirks.
 	if strings.Contains(rawUa, "Dragon/") {
 		uaFingerprint.Quirk = append(uaFingerprint.Quirk, "dragon")
@@ -197,7 +230,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "impossible_cipher")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher.String()))
-	case matchMap["extension"] == fp.MatchImpossible:
+	case matchMap["extension"] == fp.MatchImpossible && useExtensions:
 		r.BrowserSignatureMatch = fp.MatchImpossible
 		reason = append(reason, "impossible_extension")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension.String()))
@@ -226,7 +259,7 @@ func (a *Processor) Check(uaFingerprint fp.UAFingerprint, rawUa string, actualRe
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_cipher")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Cipher, actualReqFin.Cipher.String()))
-	case matchMap["extension"] == fp.MatchUnlikely:
+	case matchMap["extension"] == fp.MatchUnlikely && useExtensions:
 		r.BrowserSignatureMatch = fp.MatchUnlikely
 		reason = append(reason, "unlikely_extension")
 		reasonDetails = append(reasonDetails, fmt.Sprintf("%s vs %s", browserReqSig.Extension, actualReqFin.Extension.String()))

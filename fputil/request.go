@@ -2,7 +2,10 @@ package fp
 
 import (
 	"bytes"
+	"crypto/tls"
+	"errors"
 	"fmt"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -67,6 +70,108 @@ type RequestFingerprint struct {
 	EcPointFmt IntList
 	Header     StringList
 	Quirk      StringList
+}
+
+func uint16SliceContains(s []uint16, i uint16) bool {
+	for _, a := range s {
+		if i == a {
+			return true
+		}
+	}
+	return false
+}
+
+// Generate a fingerprint from a standard crypto/tls ClientHelloInfo structure.
+func FingerprintClientHello(chi *tls.ClientHelloInfo, r *http.Request) (RequestFingerprint, error) {
+
+	var a RequestFingerprint
+	// Make sure we have non-null inputs
+	if r == nil {
+		return a, errors.New("httpRequest was nil")
+	}
+	if chi == nil {
+		return a, errors.New("clientHello was nil")
+	}
+
+	// Get Max Supported TLS Version
+	var version Version
+	if 		  uint16SliceContains(chi.SupportedVersions, uint16(0x0304)) {
+		version = Version(0x0304)
+	} else if uint16SliceContains(chi.SupportedVersions, uint16(0x0303)) {
+		version = Version(0x0303)
+	} else if uint16SliceContains(chi.SupportedVersions, uint16(0x0302)) {
+		version = Version(0x0302)
+	} else if uint16SliceContains(chi.SupportedVersions, uint16(0x0301)) {
+		version = Version(0x0301)
+	} else if uint16SliceContains(chi.SupportedVersions, uint16(0x0300)) {
+		version = Version(0x0300)
+	} else if uint16SliceContains(chi.SupportedVersions, uint16(0x0200)) {
+		version = Version(0x0200)
+	} else {
+		version = VersionEmpty
+	}
+
+	// Get CipherSuites as IntList
+	ciphers := make(IntList, len(chi.CipherSuites))
+	for i := range ciphers {
+		ciphers[i] = int(chi.CipherSuites[i])
+	}
+
+	// Get Extensions
+	// We don't see all extension from ClientHello
+	// We can extrapolate if some extensions are in use
+	extensions := make(IntList, 0)
+
+	// Server Name Extension (SNI)
+	if chi.ServerName != "" {
+		extensions = append(extensions, 0)
+	}
+	// Supported Elliptic Curves Extension (Supported Groups)
+	if len(chi.SupportedCurves) > 0 {
+		extensions = append(extensions, 10)
+	}
+	// Supported Points Format Extension
+	if len(chi.SupportedPoints) > 0 {
+		extensions = append(extensions, 11)
+	}
+	// Signature Algorithms Extension
+	if len(chi.SignatureSchemes) > 0 {
+		extensions = append(extensions, 13)
+	}
+	// Application-Layer Protocol NegotiationExtension
+	if len(chi.SupportedProtos) > 0 {
+		extensions = append(extensions, 16)
+	}
+
+	// Get Supported Curves as IntList
+	curves := make(IntList, len(chi.SupportedCurves))
+	for i := range curves {
+		curves[i] = int(chi.SupportedCurves[i])
+	}
+
+	// Get EC Point Formats
+	ecPointFmts := make(IntList, len(chi.SupportedPoints))
+	for i := range ecPointFmts {
+		ecPointFmts[i] = int(chi.SupportedPoints[i])
+	}
+
+	// Get HTTP Headers as StringList
+	headers := make(StringList, 0)
+	for k, _ := range r.Header {
+		headers = append(headers, strings.ToLower(k))
+	}
+
+	// Since we don't control parsing, we can't see quirks for now.
+	quirkList := make(StringList, 0)
+
+	a.Version = version        //Version
+	a.Cipher = ciphers         //IntList
+	a.Extension = extensions   //IntList
+	a.Curve = curves           //IntList
+	a.EcPointFmt = ecPointFmts //IntList
+	a.Header = headers         //StringList
+	a.Quirk = quirkList        //StringList
+	return a, nil
 }
 
 // NewRequestFingerprint is a wrapper around RequestFingerprint.Parse
