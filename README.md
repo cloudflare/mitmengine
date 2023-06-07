@@ -104,7 +104,11 @@ You'll likely want to run vendoring or gomod logic before running tests on MITME
 To test, run `make test` and to see code coverage, run `make cover`.
 
 ## How to Contribute
-As browser and mitm fingerprints quickly become outdated, we are actively seeking to update the fingerprint repository with new samples. To contribute fingerprint samples, please follow these steps:
+As browser and mitm fingerprints quickly become outdated, we are actively seeking to update the fingerprint repository with new samples.
+
+By contributing a fingerprint sample (the "Sample"), you (on your own behalf or on behalf of the organization you represent or are sponsored by (if any)) grant Cloudflare, Inc. and its subsidiaries and affiliates a perpetual, irrevocable, nonexclusive, royalty-free, worldwide right and license under all intellectual property rights in the Sample, to: (1) copy, publish, display, and distribute the Sample; and (2) prepare derivative works that are based on or part of the Sample."
+
+To contribute fingerprint samples, please follow these steps:
 
 ### Generate a fingerprint sample
 (tested on macOS Mojave 10.14.3)
