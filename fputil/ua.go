@@ -57,6 +57,23 @@ func NewUAFingerprint(s string) (UAFingerprint, error) {
 	return a, err
 }
 
+// UAFingerprintFromUserAgentString returns a new user agent fingerprint parsed
+// from a user-agent header
+func UAFingerprintFromUserAgentString(s string) UAFingerprint {
+
+	parsed := ua.Parse(s)
+	return UAFingerprint{
+		BrowserName:    int(parsed.Browser.Name),
+		BrowserVersion: UAVersion(parsed.Browser.Version),
+		OSPlatform:     int(parsed.OS.Platform),
+		OSName:         int(parsed.OS.Name),
+		OSVersion:      UAVersion(parsed.OS.Version),
+		DeviceType:     int(parsed.DeviceType),
+		// This parser doesn't reveal quirks
+		Quirk: make(StringList, 0),
+	}
+}
+
 // Parse a user agent fingerprint from a string and return an error on failure
 func (a *UAFingerprint) Parse(s string) error {
 	var err error
