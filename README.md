@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/cloudflare/mitmengine.svg?branch=master)](https://travis-ci.org/cloudflare/mitmengine)
 
+## DEPRECATION NOTICE: This software is no longer maintained.
+
 The goal of this project is to allow for accurate detection of HTTPS interception and robust TLS fingerprinting.
 This project is based off of [The Security Impact of HTTPS Interception](https://zakird.com/papers/https_interception.pdf), and started as a port to Go of [their processing scripts and fingerprints](https://github.com/zakird/tlsfingerprints).
 
