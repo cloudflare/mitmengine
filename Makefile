@@ -10,6 +10,7 @@ TARGETS = $(addprefix $(BIN_DIR)/,$(CMDS))
 $(BIN_DIR)/%:
 	@if [ ! -d cmd/$* ]; then echo "Error: No directory at cmd/$*." && exit 1; fi
 	go build -o bin/$* $(VERSION_FLAGS) ./cmd/$*
+	@if [ $* = "webserver_integration_demo" ]; then openssl genrsa -out bin/private.key 2048; openssl req -new -x509 -sha256 -key bin/private.key -out bin/cert.crt -days 3650 -subj "/C=AA/ST=Tranquility/L=Eagle/O=Foo/CN=localhost"; fi
 
 .PHONY: build
 build: $(TARGETS)

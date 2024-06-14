@@ -1,6 +1,9 @@
 package fp_test
 
 import (
+	"crypto/tls"
+	"net/http"
+	"strings"
 	"testing"
 
 	fp "github.com/cloudflare/mitmengine/fputil"
@@ -299,4 +302,108 @@ func TestGrade(t *testing.T) {
 	}
 	grade := requestSignature.Grade()
 	testutil.Equals(t, fp.GradeA, grade)
+}
+
+
+func parseReqFingerprintString(t *testing.T, s string) fp.RequestFingerprint {
+	parsed, err := fp.NewRequestFingerprint(s)
+	testutil.Ok(t, err)
+	return parsed
+}
+
+func populateClientHelloInfo(tlsVersions []uint16, ecPoints []uint8, ciphers []uint16, curves []tls.CurveID) (*tls.ClientHelloInfo) {
+	var chi tls.ClientHelloInfo
+	chi.SupportedPoints = ecPoints
+	chi.CipherSuites = ciphers
+	chi.SupportedCurves = curves
+	chi.SupportedVersions = tlsVersions
+	return &chi
+}
+
+func populateRequest(headers []string) (*http.Request) {
+	r, _ := http.NewRequest("GET", "https://example.com", nil)
+	for _, header := range headers{
+		r.Header.Set(strings.Split(header, "|")[0],strings.Split(header, "|")[1])
+	}
+	return r
+}
+
+func TestFingerprintClientHello(t *testing.T) {
+	var tests = []struct{
+		chi 	*tls.ClientHelloInfo
+		r 		*http.Request
+		out 	fp.RequestFingerprint
+	}{
+		{
+			//Normal
+			populateClientHelloInfo(
+				[]uint16{uint16(0x0200), uint16(0x0300), uint16(0x0301), uint16(0x0302), uint16(0x0303), uint16(0x0304), uint16(0x0A0A), uint16(0x7f14)},
+				[]uint8{uint8(0x01)},
+				[]uint16{uint16(0x1301),uint16(0x1302),uint16(0x1303),uint16(0xc02b),uint16(0x35)},
+				[]tls.CurveID{tls.CurveID(0x1d),tls.CurveID(0x17),tls.CurveID(0x18)},
+			), 
+			populateRequest([]string{
+				"User-Agent|blah (blah) blah",
+			}),
+			parseReqFingerprintString(t, "0304:1301,1302,1303,c02b,35:0a,0b:1d,17,18:01:user-agent:"),
+		},
+		{
+			//Missing field
+			populateClientHelloInfo(
+				[]uint16{uint16(0x0200), uint16(0x0300), uint16(0x0301), uint16(0x0302), uint16(0x0303), uint16(0x0A0A), uint16(0x7f14)},
+				[]uint8{},
+				[]uint16{uint16(0x1301),uint16(0x1302),uint16(0x1303),uint16(0xc02b),uint16(0x35)},
+				[]tls.CurveID{tls.CurveID(0x1d),tls.CurveID(0x17),tls.CurveID(0x18)},
+			), 
+			populateRequest([]string{
+				"User-Agent|blah (blah) blah",
+			}),
+			parseReqFingerprintString(t, "0303:1301,1302,1303,c02b,35:0a:1d,17,18::user-agent:"),
+		},
+		{
+			//Missing most fields
+			populateClientHelloInfo(
+				[]uint16{uint16(0x0200)},
+				[]uint8{},
+				[]uint16{},
+				[]tls.CurveID{},
+			), 
+			populateRequest([]string{}),
+			parseReqFingerprintString(t, "0200::::::"),
+		},
+	}
+	var invalids = []struct{
+		chi 	*tls.ClientHelloInfo
+		r 		*http.Request
+		err 	string
+	}{ 
+		{
+			//Nil chi
+			nil, 
+			populateRequest([]string{
+				"User-Agent|blah (blah) blah",
+			}),
+			"clientHello was nil",
+		},
+		{
+			//Nil r
+			populateClientHelloInfo(
+				[]uint16{uint16(0x0200)},
+				[]uint8{},
+				[]uint16{},
+				[]tls.CurveID{},
+			), 
+			nil,
+			"httpRequest was nil",
+		},
+	}
+	for _, test := range tests {
+		fingerprint, err := fp.FingerprintClientHello(test.chi, test.r)
+		testutil.Ok(t, err)
+		testutil.Equals(t, fingerprint.String(), test.out.String())
+	}
+	for _, invalid := range invalids {
+		_, err := fp.FingerprintClientHello(invalid.chi, invalid.r)
+		testutil.Equals(t, err.Error(), invalid.err)
+	}
 }
